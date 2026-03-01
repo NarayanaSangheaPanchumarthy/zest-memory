@@ -13,6 +13,17 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
+        serif: ['"DM Serif Display"', 'Georgia', 'serif'],
+      },
+      fontSize: {
+        'display': ['3.5rem', { lineHeight: '1.1', letterSpacing: '-0.02em' }],
+        'heading': ['2.25rem', { lineHeight: '1.2', letterSpacing: '-0.01em' }],
+        'title': ['1.5rem', { lineHeight: '1.3' }],
+        'body-lg': ['1.125rem', { lineHeight: '1.6' }],
+        'accessible': ['1.25rem', { lineHeight: '1.7' }],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -47,6 +58,26 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        calm: {
+          DEFAULT: "hsl(var(--calm-blue))",
+          light: "hsl(var(--calm-blue-light))",
+        },
+        sage: {
+          DEFAULT: "hsl(var(--sage))",
+          light: "hsl(var(--sage-light))",
+        },
+        amber: {
+          DEFAULT: "hsl(var(--warm-amber))",
+          light: "hsl(var(--warm-amber-light))",
+        },
+        coral: {
+          DEFAULT: "hsl(var(--coral))",
+          light: "hsl(var(--coral-light))",
+        },
+        lavender: {
+          DEFAULT: "hsl(var(--lavender))",
+          light: "hsl(var(--lavender-light))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -65,25 +96,27 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "pulse-gentle": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.7" },
+        },
+        "float": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-6px)" },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "pulse-gentle": "pulse-gentle 3s ease-in-out infinite",
+        "float": "float 4s ease-in-out infinite",
       },
     },
   },
