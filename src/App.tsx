@@ -16,6 +16,7 @@ import Notifications from "./pages/Notifications";
 import PrivacySettings from "./pages/PrivacySettings";
 import HelpDesk from "./pages/HelpDesk";
 import PatientDocuments from "./pages/PatientDocuments";
+import SafetyMap from "./pages/SafetyMap";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App = () => (
             <Route path="/privacy" element={<ProtectedRoute><PrivacySettings /></ProtectedRoute>} />
             <Route path="/help" element={<ProtectedRoute><HelpDesk /></ProtectedRoute>} />
             <Route path="/documents" element={<ProtectedRoute><PatientDocuments /></ProtectedRoute>} />
+            <Route path="/safety" element={<ProtectedRoute><SafetyMap /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

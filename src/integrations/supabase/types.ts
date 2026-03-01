@@ -74,6 +74,39 @@ export type Database = {
         }
         Relationships: []
       }
+      geofence_zones: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          latitude: number
+          longitude: number
+          name: string
+          patient_id: string
+          radius_meters: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          latitude: number
+          longitude: number
+          name: string
+          patient_id: string
+          radius_meters?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          latitude?: number
+          longitude?: number
+          name?: string
+          patient_id?: string
+          radius_meters?: number
+        }
+        Relationships: []
+      }
       help_tickets: {
         Row: {
           created_at: string
@@ -170,6 +203,33 @@ export type Database = {
           patient_id?: string
           title?: string
           uploaded_by?: string
+        }
+        Relationships: []
+      }
+      patient_locations: {
+        Row: {
+          accuracy: number | null
+          id: string
+          latitude: number
+          longitude: number
+          patient_id: string
+          recorded_at: string
+        }
+        Insert: {
+          accuracy?: number | null
+          id?: string
+          latitude: number
+          longitude: number
+          patient_id: string
+          recorded_at?: string
+        }
+        Update: {
+          accuracy?: number | null
+          id?: string
+          latitude?: number
+          longitude?: number
+          patient_id?: string
+          recorded_at?: string
         }
         Relationships: []
       }
