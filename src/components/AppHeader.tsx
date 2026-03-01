@@ -12,6 +12,7 @@ const navItems = [
   { label: "Clinical", path: "/clinical" },
   { label: "Vitals", path: "/vitals" },
   { label: "Documents", path: "/documents" },
+  { label: "Safety", path: "/safety" },
 ];
 
 const AppHeader = () => {
@@ -74,9 +75,9 @@ const AppHeader = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate("/privacy")}>
             <Settings className="w-5 h-5" />
           </Button>
-          <Button variant="emergency" size="sm" className="gap-2 hidden sm:flex">
+          <Button variant="emergency" size="sm" className="gap-2 hidden sm:flex" onClick={() => navigate("/safety")}>
             <Phone className="w-4 h-4" />
-            <span>Emergency</span>
+            <span>Safety</span>
           </Button>
           {user && (
             <Button variant="ghost" size="icon" onClick={handleSignOut} title="Sign out">
