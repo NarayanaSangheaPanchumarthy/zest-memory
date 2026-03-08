@@ -3,10 +3,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Users, Search, Eye, FileText, Trash2, UserPlus, Edit2,
   Activity, Brain, AlertTriangle, X, Save, Phone, MapPin,
-  ChevronDown, ChevronUp, Filter
+  ChevronDown, ChevronUp, Filter, List
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -249,6 +252,9 @@ const PatientManagement = ({
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-4">
             <TabsTrigger value="registry">Patient Registry ({filteredPatients.length})</TabsTrigger>
+            <TabsTrigger value="list">
+              <List className="w-4 h-4 mr-1" /> Patient List
+            </TabsTrigger>
             <TabsTrigger value="assignments">Assignments ({assignments.length})</TabsTrigger>
           </TabsList>
 
@@ -495,6 +501,69 @@ const PatientManagement = ({
               </div>
             )}
           </TabsContent>
+
+          <TabsContent value="list">
+            {patientProfiles.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Users className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                <p>No patients found.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Patient Name</TableHead>
+                      <TableHead>Phone</TableHead>
+                      <TableHead>Assigned Caregivers</TableHead>
+                      <TableHead>Assigned Clinicians</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {patientProfiles.map((patient) => {
+                      const patientAssigns = assignments.filter((a) => a.patient_id === patient.user_id);
+                      const assignedCaregivers = patientAssigns
+                        .filter((a) => allRoles.find((r) => r.user_id === a.assigned_user_id)?.role === "caregiver")
+                        .map((a) => allProfiles.find((p) => p.user_id === a.assigned_user_id)?.full_name || "Unknown");
+                      const assignedClinicians = patientAssigns
+                        .filter((a) => allRoles.find((r) => r.user_id === a.assigned_user_id)?.role === "clinician")
+                        .map((a) => allProfiles.find((p) => p.user_id === a.assigned_user_id)?.full_name || "Unknown");
+
+                      return (
+                        <TableRow key={patient.user_id}>
+                          <TableCell className="font-medium">{patient.full_name || "—"}</TableCell>
+                          <TableCell className="text-muted-foreground">{patient.phone || "—"}</TableCell>
+                          <TableCell>
+                            {assignedCaregivers.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {assignedCaregivers.map((name, i) => (
+                                  <Badge key={i} variant="secondary" className="text-xs">{name}</Badge>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">None</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {assignedClinicians.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {assignedClinicians.map((name, i) => (
+                                  <Badge key={i} variant="outline" className="text-xs">{name}</Badge>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">None</span>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </TabsContent>
+
 
           <TabsContent value="assignments">
             {assignments.length === 0 ? (
