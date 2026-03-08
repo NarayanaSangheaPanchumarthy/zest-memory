@@ -207,6 +207,7 @@ const fadeUp = {
 const Index = () => {
   const navigate = useNavigate();
   const { role } = useAuth();
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     if (role && roleRedirects[role]) {
@@ -214,27 +215,66 @@ const Index = () => {
     }
   }, [role, navigate]);
 
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  };
+
   if (role && roleRedirects[role]) return null;
+
+  const navLinks = [
+    { label: "What", id: "what" },
+    { label: "Why", id: "why" },
+    { label: "Who", id: "who" },
+    { label: "When", id: "when" },
+    { label: "Where", id: "where" },
+  ];
 
   return (
     <main className="min-h-screen bg-background">
-      {/* HERO */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 gradient-hero opacity-[0.07]" />
-        <div className="relative max-w-6xl mx-auto px-6 pt-12 pb-6">
-          <div className="flex items-center justify-between mb-12">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-lg gradient-calm flex items-center justify-center">
-                <Brain className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <span className="font-serif text-xl text-foreground">MemoGuard</span>
+      {/* STICKY NAV */}
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? "bg-background/95 backdrop-blur-md shadow-soft border-b border-border"
+            : "bg-transparent"
+        }`}
+      >
+        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg gradient-calm flex items-center justify-center">
+              <Brain className="w-4 h-4 text-primary-foreground" />
             </div>
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>Sign In</Button>
-              <Button size="sm" onClick={() => navigate("/auth")}>Sign Up Free</Button>
-            </div>
+            <span className="font-serif text-lg text-foreground">MemoGuard</span>
+          </div>
+
+          <div className="hidden md:flex items-center gap-1">
+            {navLinks.map((link) => (
+              <button
+                key={link.id}
+                onClick={() => scrollTo(link.id)}
+                className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-muted cursor-pointer"
+              >
+                {link.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>Sign In</Button>
+            <Button size="sm" onClick={() => navigate("/auth")}>Sign Up Free</Button>
           </div>
         </div>
+      </nav>
+
+      {/* HERO */}
+      <section className="relative overflow-hidden pt-14">
+        <div className="absolute inset-0 gradient-hero opacity-[0.07]" />
 
         <div className="relative max-w-6xl mx-auto px-6 pb-20 sm:pb-28 text-center">
           <motion.div
