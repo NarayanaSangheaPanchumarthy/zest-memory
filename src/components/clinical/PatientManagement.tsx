@@ -502,7 +502,69 @@ const PatientManagement = ({
             )}
           </TabsContent>
 
-          <TabsContent value="assignments">
+          <TabsContent value="list">
+            {patientProfiles.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Users className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                <p>No patients found.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Patient Name</TableHead>
+                      <TableHead>Phone</TableHead>
+                      <TableHead>Assigned Caregivers</TableHead>
+                      <TableHead>Assigned Clinicians</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {patientProfiles.map((patient) => {
+                      const patientAssigns = assignments.filter((a) => a.patient_id === patient.user_id);
+                      const assignedCaregivers = patientAssigns
+                        .filter((a) => allRoles.find((r) => r.user_id === a.assigned_user_id)?.role === "caregiver")
+                        .map((a) => allProfiles.find((p) => p.user_id === a.assigned_user_id)?.full_name || "Unknown");
+                      const assignedClinicians = patientAssigns
+                        .filter((a) => allRoles.find((r) => r.user_id === a.assigned_user_id)?.role === "clinician")
+                        .map((a) => allProfiles.find((p) => p.user_id === a.assigned_user_id)?.full_name || "Unknown");
+
+                      return (
+                        <TableRow key={patient.user_id}>
+                          <TableCell className="font-medium">{patient.full_name || "—"}</TableCell>
+                          <TableCell className="text-muted-foreground">{patient.phone || "—"}</TableCell>
+                          <TableCell>
+                            {assignedCaregivers.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {assignedCaregivers.map((name, i) => (
+                                  <Badge key={i} variant="secondary" className="text-xs">{name}</Badge>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">None</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {assignedClinicians.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {assignedClinicians.map((name, i) => (
+                                  <Badge key={i} variant="outline" className="text-xs">{name}</Badge>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">None</span>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </TabsContent>
+
+
             {assignments.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <UserPlus className="w-12 h-12 mx-auto mb-4 opacity-30" />
