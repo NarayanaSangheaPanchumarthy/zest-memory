@@ -42,8 +42,8 @@ const PatientDocuments = () => {
       const filePath = `${user.id}/${Date.now()}_${file.name}`;
       const { error: uploadErr } = await supabase.storage.from("patient-documents").upload(filePath, file);
       if (uploadErr) { toast.error("File upload failed"); setLoading(false); return; }
-      const { data: urlData } = supabase.storage.from("patient-documents").getPublicUrl(filePath);
-      fileUrl = urlData.publicUrl;
+      // Store the path, not a public URL — we'll generate signed URLs on-the-fly
+      fileUrl = filePath;
       fileType = file.type;
     }
 
