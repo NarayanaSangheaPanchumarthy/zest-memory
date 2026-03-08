@@ -104,6 +104,11 @@
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 3.75rem;
+  }
+
   body {
     @apply bg-background text-foreground font-sans antialiased;
   }
