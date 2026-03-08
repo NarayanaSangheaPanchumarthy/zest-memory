@@ -168,20 +168,20 @@ const PatientDashboard = () => {
                 <CardTitle className="text-base">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
                   {[
                     { label: "Memory Games", icon: Gamepad2, color: "bg-[hsl(200,40%,92%)] text-[hsl(200,35%,45%)]", path: "/games" },
                     { label: "AI Chat", icon: MessageCircle, color: "bg-[hsl(150,25%,92%)] text-[hsl(150,20%,50%)]", path: "/chat" },
-                    { label: "My Documents", icon: FileText, color: "bg-[hsl(35,80%,93%)] text-[hsl(35,80%,55%)]", path: "/documents" },
-                    { label: "My Vitals", icon: Clock, color: "bg-[hsl(260,35%,93%)] text-[hsl(260,30%,60%)]", path: "/vitals" },
+                    { label: "Documents", icon: FileText, color: "bg-[hsl(35,80%,93%)] text-[hsl(35,80%,55%)]", path: "/documents" },
+                    { label: "Vitals", icon: Clock, color: "bg-[hsl(260,35%,93%)] text-[hsl(260,30%,60%)]", path: "/vitals" },
                   ].map((action) => (
                     <button
                       key={action.label}
                       onClick={() => navigate(action.path)}
-                      className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:opacity-80 transition-opacity cursor-pointer`}
+                      className={`flex flex-col items-center gap-1.5 sm:gap-2 p-3 sm:p-4 rounded-xl ${action.color} hover:opacity-80 transition-opacity cursor-pointer`}
                     >
-                      <action.icon className="w-7 h-7" />
-                      <span className="text-sm font-medium">{action.label}</span>
+                      <action.icon className="w-6 h-6 sm:w-7 sm:h-7" />
+                      <span className="text-xs sm:text-sm font-medium">{action.label}</span>
                     </button>
                   ))}
                 </div>

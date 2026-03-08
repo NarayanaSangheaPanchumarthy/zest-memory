@@ -578,22 +578,26 @@ const PatientManagement = ({
                   const caregiverName = allProfiles.find((p) => p.user_id === a.assigned_user_id)?.full_name || a.assigned_user_id.slice(0, 8);
                   const caregiverRole = allRoles.find((r) => r.user_id === a.assigned_user_id)?.role || "unknown";
                   return (
-                    <div key={a.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                          <span className="text-xs font-semibold text-primary">{patientName.charAt(0)}</span>
+                      <div key={a.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 gap-2">
+                      <div className="flex items-center gap-2 sm:gap-3 flex-wrap min-w-0">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                            <span className="text-xs font-semibold text-primary">{patientName.charAt(0)}</span>
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate">{patientName}</p>
+                            <p className="text-xs text-muted-foreground">Patient</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-foreground">{patientName}</p>
-                          <p className="text-xs text-muted-foreground">Patient</p>
-                        </div>
-                        <span className="text-muted-foreground">→</span>
-                        <div className="w-8 h-8 rounded-full bg-sage/10 flex items-center justify-center">
-                          <span className="text-xs font-semibold text-sage">{caregiverName.charAt(0)}</span>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-foreground">{caregiverName}</p>
-                          <p className="text-xs text-muted-foreground capitalize">{caregiverRole}</p>
+                        <span className="text-muted-foreground hidden sm:inline">→</span>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-8 h-8 rounded-full bg-[hsl(var(--sage))]/10 flex items-center justify-center shrink-0">
+                            <span className="text-xs font-semibold text-[hsl(var(--sage))]">{caregiverName.charAt(0)}</span>
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate">{caregiverName}</p>
+                            <p className="text-xs text-muted-foreground capitalize">{caregiverRole}</p>
+                          </div>
                         </div>
                       </div>
                       <Button

@@ -89,7 +89,7 @@ const Index = () => {
               : "Supporting patients, caregivers, and clinicians with AI-driven insights and daily care tools."}
           </motion.p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto">
             {roles.map((r, i) => (
               <motion.button
                 key={r.title}
@@ -98,7 +98,7 @@ const Index = () => {
                 transition={{ delay: 0.3 + i * 0.12 }}
                 whileHover={{ y: -6, transition: { duration: 0.2 } }}
                 onClick={() => navigate(r.path)}
-                className="group flex flex-col items-center gap-4 p-8 rounded-2xl bg-card shadow-card border border-border hover:shadow-elevated transition-all cursor-pointer text-center"
+                className="group flex flex-3 sm:gap-4 p-6 sm:l items-center gap-4 p-8 rounded-2xl bg-card shadow-card border border-border hover:shadow-elevated transition-all cursor-pointer text-center"
               >
                 <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${r.iconBg} group-hover:scale-110 transition-transform`}>
                   <r.icon className="w-8 h-8" />
