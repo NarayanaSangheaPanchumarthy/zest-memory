@@ -18,6 +18,7 @@ import HelpDesk from "./pages/HelpDesk";
 import PatientDocuments from "./pages/PatientDocuments";
 import SafetyMap from "./pages/SafetyMap";
 import MemoryGames from "./pages/MemoryGames";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/patient" element={<ProtectedRoute allowedRoles={['patient']}><PatientDashboard /></ProtectedRoute>} />
             <Route path="/caregiver" element={<ProtectedRoute allowedRoles={['caregiver', 'clinician']}><CaregiverDashboard /></ProtectedRoute>} />
