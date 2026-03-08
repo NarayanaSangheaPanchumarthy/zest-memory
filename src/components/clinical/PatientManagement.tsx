@@ -235,7 +235,7 @@ const PatientManagement = ({
             />
           </div>
           <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as any)}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <Filter className="w-4 h-4 mr-2" />
               <SelectValue />
             </SelectTrigger>
