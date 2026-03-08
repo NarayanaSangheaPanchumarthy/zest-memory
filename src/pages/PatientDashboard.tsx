@@ -5,6 +5,7 @@ import {
   Mic, Clock, Pill, Sun, Moon, Coffee, Brain, Smile,
   MessageCircle, Gamepad2, Calendar
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
