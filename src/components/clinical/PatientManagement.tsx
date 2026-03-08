@@ -250,12 +250,12 @@ const PatientManagement = ({
 
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-4">
-            <TabsTrigger value="registry">Patient Registry ({filteredPatients.length})</TabsTrigger>
-            <TabsTrigger value="list">
-              <List className="w-4 h-4 mr-1" /> Patient List
+          <TabsList className="mb-4 w-full justify-start overflow-x-auto flex-nowrap">
+            <TabsTrigger value="registry" className="text-xs sm:text-sm">Registry ({filteredPatients.length})</TabsTrigger>
+            <TabsTrigger value="list" className="text-xs sm:text-sm">
+              <List className="w-4 h-4 mr-1" /> List
             </TabsTrigger>
-            <TabsTrigger value="assignments">Assignments ({assignments.length})</TabsTrigger>
+            <TabsTrigger value="assignments" className="text-xs sm:text-sm">Assigns ({assignments.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="registry">
