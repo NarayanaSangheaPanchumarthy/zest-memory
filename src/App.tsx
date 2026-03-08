@@ -34,6 +34,7 @@ const App = () => (
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/patient" element={<ProtectedRoute allowedRoles={['patient']}><PatientDashboard /></ProtectedRoute>} />
             <Route path="/caregiver" element={<ProtectedRoute allowedRoles={['caregiver', 'clinician']}><CaregiverDashboard /></ProtectedRoute>} />
+            <Route path="/patient" element={<ProtectedRoute allowedRoles={['patient']}><PatientDashboard /></ProtectedRoute>} />
             <Route path="/clinical" element={<ProtectedRoute allowedRoles={['clinician']}><ClinicalPanel /></ProtectedRoute>} />
             <Route path="/chat" element={<ProtectedRoute><AIChatbot /></ProtectedRoute>} />
             <Route path="/vitals" element={<ProtectedRoute><VitalsMonitor /></ProtectedRoute>} />

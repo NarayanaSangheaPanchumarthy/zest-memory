@@ -1,32 +1,38 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { Heart, Shield, Brain, ArrowRight } from "lucide-react";
+import { Heart, Shield, Brain, ArrowRight, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
 const roles = [
   {
-    title: "I'm a Patient",
-    description: "Access your daily routine, memory exercises, and AI assistant",
+    title: "Patient",
+    subtitle: "I need daily care support",
+    description: "Daily routines, medication reminders, mood diary, memory games & AI assistant",
     icon: Heart,
     path: "/patient",
-    color: "bg-calm-light text-calm",
+    gradient: "from-[hsl(200,35%,45%)] to-[hsl(180,30%,50%)]",
+    iconBg: "bg-[hsl(200,40%,92%)] text-[hsl(200,35%,45%)]",
     role: "patient" as const,
   },
   {
-    title: "I'm a Caregiver",
-    description: "Monitor loved ones, track medication, and receive AI insights",
+    title: "Caregiver",
+    subtitle: "I care for someone",
+    description: "Patient monitoring, care tasks, communication logs & emergency tools",
     icon: Shield,
     path: "/caregiver",
-    color: "bg-sage-light text-sage",
+    gradient: "from-[hsl(150,25%,50%)] to-[hsl(170,25%,45%)]",
+    iconBg: "bg-[hsl(150,25%,92%)] text-[hsl(150,20%,50%)]",
     role: "caregiver" as const,
   },
   {
-    title: "I'm a Clinician",
-    description: "View clinical analytics, cognitive assessments, and reports",
+    title: "Clinician",
+    subtitle: "I provide clinical care",
+    description: "AI risk assessment, cognitive analytics, patient management & reports",
     icon: Brain,
     path: "/clinical",
-    color: "bg-lavender-light text-lavender",
+    gradient: "from-[hsl(260,30%,60%)] to-[hsl(280,25%,55%)]",
+    iconBg: "bg-[hsl(260,35%,93%)] text-[hsl(260,30%,60%)]",
     role: "clinician" as const,
   },
 ];
@@ -37,52 +43,36 @@ const roleRedirects: Record<string, string> = {
   clinician: "/clinical",
 };
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.15, duration: 0.5, ease: "easeOut" as const },
-  }),
-};
-
 const Index = () => {
   const navigate = useNavigate();
-  const { role } = useAuth();
+  const { role, profile } = useAuth();
 
-  // Auto-redirect if user already has a role
   useEffect(() => {
     if (role && roleRedirects[role]) {
       navigate(roleRedirects[role], { replace: true });
     }
   }, [role, navigate]);
 
-  // If redirecting, show nothing
-  if (role && roleRedirects[role]) {
-    return null;
-  }
+  if (role && roleRedirects[role]) return null;
 
   return (
-    <main className="min-h-screen flex flex-col">
-      {/* Hero */}
-      <section className="relative flex-1 flex items-center justify-center px-6 py-20 overflow-hidden">
-        <div className="absolute inset-0 gradient-hero opacity-5" />
-        <div className="relative z-10 max-w-3xl mx-auto text-center">
+    <main className="min-h-screen flex flex-col bg-background">
+      <section className="flex-1 flex items-center justify-center px-6 py-16">
+        <div className="max-w-4xl mx-auto text-center">
           <motion.div
-            initial={{ opacity: 0, y: -12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-calm-light text-calm text-sm font-medium mb-8"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8"
           >
-            <Brain className="w-4 h-4" />
-            AI-Powered Alzheimer's Care
+            <Sparkles className="w-4 h-4" />
+            AI-Powered Alzheimer's Care Platform
           </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            className="text-display font-serif text-foreground mb-6"
+            transition={{ delay: 0.1 }}
+            className="text-4xl sm:text-5xl lg:text-6xl font-serif text-foreground mb-4 leading-tight"
           >
             Compassionate care,{" "}
             <span className="text-primary">powered by AI</span>
@@ -91,40 +81,40 @@ const Index = () => {
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="text-accessible text-muted-foreground mb-12 max-w-2xl mx-auto"
+            transition={{ delay: 0.2 }}
+            className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto"
           >
-            A secure platform that supports Alzheimer's patients with daily living
-            while giving caregivers and clinicians actionable AI-driven insights.
+            {profile
+              ? `Welcome back, ${profile.full_name}. Choose your dashboard below.`
+              : "Supporting patients, caregivers, and clinicians with AI-driven insights and daily care tools."}
           </motion.p>
 
-          <div className="grid sm:grid-cols-3 gap-5 max-w-2xl mx-auto">
+          <div className="grid sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
             {roles.map((r, i) => (
               <motion.button
                 key={r.title}
-                custom={i}
-                variants={fadeUp}
-                initial="hidden"
-                animate="visible"
-                whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 + i * 0.12 }}
+                whileHover={{ y: -6, transition: { duration: 0.2 } }}
                 onClick={() => navigate(r.path)}
-                className="flex flex-col items-center gap-4 p-6 rounded-2xl bg-card shadow-card border border-border hover:shadow-elevated transition-shadow cursor-pointer text-center"
+                className="group flex flex-col items-center gap-4 p-8 rounded-2xl bg-card shadow-card border border-border hover:shadow-elevated transition-all cursor-pointer text-center"
               >
-                <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${r.color}`}>
-                  <r.icon className="w-7 h-7" />
+                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${r.iconBg} group-hover:scale-110 transition-transform`}>
+                  <r.icon className="w-8 h-8" />
                 </div>
                 <div>
-                  <h3 className="text-title font-serif text-foreground mb-1">{r.title}</h3>
-                  <p className="text-sm text-muted-foreground">{r.description}</p>
+                  <h3 className="text-xl font-serif text-foreground mb-1">{r.title}</h3>
+                  <p className="text-xs font-medium text-primary mb-2">{r.subtitle}</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{r.description}</p>
                 </div>
-                <ArrowRight className="w-5 h-5 text-muted-foreground" />
+                <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
               </motion.button>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="py-6 px-6 text-center text-sm text-muted-foreground border-t border-border">
         <p>MemoGuard — HIPAA-Compliant Alzheimer's Care Platform</p>
       </footer>

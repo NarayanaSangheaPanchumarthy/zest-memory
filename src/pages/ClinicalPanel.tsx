@@ -135,21 +135,21 @@ const ClinicalPanel = () => {
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <h1 className="text-heading text-foreground">Clinical Insights</h1>
-          <p className="text-accessible text-muted-foreground">
-            Patient management, AI analytics & risk assessment
+          <h1 className="text-2xl sm:text-3xl font-serif text-foreground">Clinical Dashboard</h1>
+          <p className="text-muted-foreground">
+            AI-powered patient management, analytics & risk assessment
           </p>
         </motion.div>
 
-        {/* Overview Stats */}
+        {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             { label: "Total Patients", value: String(patients.length), icon: BarChart3, color: "text-primary" },
-            { label: "Avg. Cognitive Score", value: avgScore != null ? avgScore + "%" : "—", icon: Brain, color: "text-lavender" },
-            { label: "Active Alerts", value: String(totalAlerts), icon: AlertTriangle, color: totalAlerts > 0 ? "text-coral" : "text-sage" },
-            { label: "Assignments", value: String(assignments.length), icon: Activity, color: "text-sage" },
+            { label: "Avg. Cognitive", value: avgScore != null ? avgScore + "%" : "—", icon: Brain, color: "text-[hsl(var(--lavender))]" },
+            { label: "Active Alerts", value: String(totalAlerts), icon: AlertTriangle, color: totalAlerts > 0 ? "text-destructive" : "text-[hsl(var(--sage))]" },
+            { label: "Assignments", value: String(assignments.length), icon: Activity, color: "text-[hsl(var(--sage))]" },
           ].map((stat, i) => (
             <motion.div key={stat.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
               <Card className="shadow-card">
@@ -171,11 +171,11 @@ const ClinicalPanel = () => {
         )}
 
         <div className="grid lg:grid-cols-2 gap-6">
-          {/* Cognitive Trend Chart */}
+          {/* Cognitive Trend */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
             <Card className="shadow-card">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-title">
+                <CardTitle className="flex items-center gap-2 text-base">
                   <TrendingDown className="w-5 h-5 text-primary" />
                   Cognitive Score Trend
                   {patientWithTrend && (
@@ -213,8 +213,8 @@ const ClinicalPanel = () => {
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
             <Card className="shadow-card">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-title">
-                  <AlertTriangle className="w-5 h-5 text-coral" />
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <AlertTriangle className="w-5 h-5 text-destructive" />
                   Recent Alerts
                 </CardTitle>
               </CardHeader>
@@ -228,7 +228,7 @@ const ClinicalPanel = () => {
                       <div
                         key={alert.id}
                         className={`flex items-start gap-2 p-3 rounded-lg text-sm ${
-                          alert.is_resolved ? "bg-muted/30 opacity-60" : alert.severity === "critical" ? "bg-coral-light" : "bg-amber-light"
+                          alert.is_resolved ? "bg-muted/30 opacity-60" : alert.severity === "critical" ? "bg-[hsl(var(--coral-light))]" : "bg-[hsl(var(--warm-amber-light))]"
                         }`}
                       >
                         <div className="flex-1">
@@ -243,7 +243,7 @@ const ClinicalPanel = () => {
                             <CheckCircle2 className="w-3 h-3 mr-1" /> Resolve
                           </Button>
                         ) : (
-                          <Badge className="bg-sage/10 text-sage text-xs shrink-0">Resolved</Badge>
+                          <Badge className="bg-[hsl(var(--sage))]/10 text-[hsl(var(--sage))] text-xs shrink-0">Resolved</Badge>
                         )}
                       </div>
                     );

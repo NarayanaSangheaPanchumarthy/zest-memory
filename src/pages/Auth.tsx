@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Brain, Eye, EyeOff, UserPlus, LogIn } from "lucide-react";
+import { Brain, Eye, EyeOff, UserPlus, LogIn, Heart, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -17,6 +18,7 @@ const loginSchema = z.object({
 
 const registerSchema = loginSchema.extend({
   fullName: z.string().trim().min(1, "Full name is required").max(100),
+  role: z.enum(["patient", "caregiver", "clinician"], { required_error: "Please select a role" }),
 });
 
 const Auth = () => {
@@ -24,50 +26,33 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [role, setRole] = useState<string>("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async () => {
     const result = loginSchema.safeParse({ email, password });
-    if (!result.success) {
-      toast.error(result.error.errors[0].message);
-      return;
-    }
+    if (!result.success) { toast.error(result.error.errors[0].message); return; }
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success("Welcome back!");
-      navigate("/");
-    }
+    if (error) { toast.error(error.message); }
+    else { toast.success("Welcome back!"); navigate("/"); }
   };
 
   const handleRegister = async () => {
-    const result = registerSchema.safeParse({ email, password, fullName });
-    if (!result.success) {
-      toast.error(result.error.errors[0].message);
-      return;
-    }
+    const result = registerSchema.safeParse({ email, password, fullName, role });
+    if (!result.success) { toast.error(result.error.errors[0].message); return; }
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: { full_name: fullName },
-        emailRedirectTo: window.location.origin,
-      },
+      options: { data: { full_name: fullName }, emailRedirectTo: window.location.origin },
     });
-    if (error) {
-      setLoading(false);
-      toast.error(error.message);
-      return;
-    }
+    if (error) { setLoading(false); toast.error(error.message); return; }
     if (data.user) {
-      // Always assign patient role — privileged roles are assigned by clinicians
-      await supabase.from("user_roles").insert({ user_id: data.user.id, role: "patient" as const });
+      await supabase.from("user_roles").insert({ user_id: data.user.id, role: role as any });
     }
     setLoading(false);
     toast.success("Account created! Please check your email to verify your account.");
@@ -75,11 +60,7 @@ const Auth = () => {
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4 py-12 bg-background">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
         <div className="flex items-center justify-center gap-2 mb-8">
           <div className="w-10 h-10 rounded-lg gradient-calm flex items-center justify-center">
             <Brain className="w-6 h-6 text-primary-foreground" />
@@ -89,7 +70,7 @@ const Auth = () => {
 
         <Card className="shadow-elevated">
           <CardHeader className="text-center pb-2">
-            <CardTitle className="text-title">
+            <CardTitle className="text-xl font-serif">
               {isLogin ? "Welcome Back" : "Create Account"}
             </CardTitle>
             <p className="text-sm text-muted-foreground">
@@ -98,26 +79,36 @@ const Auth = () => {
           </CardHeader>
           <CardContent className="space-y-4 pt-4">
             {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
-                <Input
-                  id="fullName"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Enter your full name"
-                />
-              </div>
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Full Name</Label>
+                  <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Enter your full name" />
+                </div>
+                <div className="space-y-2">
+                  <Label>I am a...</Label>
+                  <Select value={role} onValueChange={setRole}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="patient">
+                        <span className="flex items-center gap-2"><Heart className="w-4 h-4" /> Patient</span>
+                      </SelectItem>
+                      <SelectItem value="caregiver">
+                        <span className="flex items-center gap-2"><Shield className="w-4 h-4" /> Caregiver</span>
+                      </SelectItem>
+                      <SelectItem value="clinician">
+                        <span className="flex items-center gap-2"><Brain className="w-4 h-4" /> Clinician</span>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
             )}
 
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-              />
+              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
             </div>
 
             <div className="space-y-2">
@@ -129,6 +120,7 @@ const Auth = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
+                  onKeyDown={(e) => e.key === "Enter" && (isLogin ? handleLogin() : handleRegister())}
                 />
                 <button
                   type="button"
@@ -140,14 +132,10 @@ const Auth = () => {
               </div>
             </div>
 
-
-
-
             <Button
               onClick={isLogin ? handleLogin : handleRegister}
               disabled={loading}
               className="w-full"
-              variant="hero"
               size="lg"
             >
               {loading ? (

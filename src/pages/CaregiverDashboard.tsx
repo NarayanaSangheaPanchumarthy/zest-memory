@@ -5,7 +5,7 @@ import AppHeader from "@/components/AppHeader";
 import EmergencySOS from "@/components/EmergencySOS";
 import {
   Bell, Activity, MapPin, MessageCircle, AlertTriangle,
-  CheckCircle2, Heart, Brain, FileText, Eye, Users, Loader2, Pill
+  CheckCircle2, Brain, FileText, Eye, Users, Loader2, Pill
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -60,13 +60,12 @@ const CaregiverDashboard = () => {
   const loadData = async () => {
     if (!user) return;
     setLoading(true);
-
     const { data: assignments } = await supabase
       .from("patient_assignments")
       .select("patient_id")
       .eq("assigned_user_id", user.id);
 
-    if (!assignments || assignments.length === 0) { setLoading(false); return; }
+    if (!assignments || assignments.length === 0) { setPatients([]); setLoading(false); return; }
     const patientIds = assignments.map((a) => a.patient_id);
 
     const [profilesRes, vitalsRes, alertsRes, gamesRes, medsRes] = await Promise.all([
@@ -79,13 +78,11 @@ const CaregiverDashboard = () => {
 
     const profileMap: Record<string, { full_name: string; phone: string | null }> = {};
     profilesRes.data?.forEach((p) => { profileMap[p.user_id] = { full_name: p.full_name, phone: p.phone }; });
-
     setPatients(patientIds.map((id) => ({ patient_id: id, profile: profileMap[id] || null })));
 
     const latestVitals: Record<string, VitalRecord> = {};
     vitalsRes.data?.forEach((v) => { if (!latestVitals[v.patient_id]) latestVitals[v.patient_id] = v as VitalRecord; });
     setVitals(latestVitals);
-
     setAlerts((alertsRes.data || []) as AlertRecord[]);
 
     const latestScores: Record<string, number | null> = {};
@@ -95,7 +92,6 @@ const CaregiverDashboard = () => {
     const medsMap: Record<string, any[]> = {};
     medsRes.data?.forEach((m) => { if (!medsMap[m.patient_id]) medsMap[m.patient_id] = []; medsMap[m.patient_id].push(m); });
     setMedications(medsMap);
-
     setLoading(false);
   };
 
@@ -108,7 +104,6 @@ const CaregiverDashboard = () => {
   const patientName = (id: string) => patients.find((p) => p.patient_id === id)?.profile?.full_name || "Unknown";
   const patientNames: Record<string, string> = {};
   patients.forEach(p => { patientNames[p.patient_id] = p.profile?.full_name || "Unknown"; });
-
   const profileNames: Record<string, string> = {};
   patients.forEach(p => { if (p.profile) profileNames[p.patient_id] = p.profile.full_name; });
   if (user) profileNames[user.id] = "You";
@@ -127,10 +122,10 @@ const CaregiverDashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <h1 className="text-heading text-foreground">Caregiver Dashboard</h1>
-          <p className="text-accessible text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-serif text-foreground">Caregiver Dashboard</h1>
+          <p className="text-muted-foreground">
             Managing {patients.length} patient{patients.length !== 1 ? "s" : ""}
           </p>
         </motion.div>
@@ -139,8 +134,8 @@ const CaregiverDashboard = () => {
           <Card className="shadow-card">
             <CardContent className="py-16 text-center">
               <Users className="w-12 h-12 mx-auto mb-4 text-muted-foreground/30" />
-              <p className="text-muted-foreground">No patients assigned yet.</p>
-              <p className="text-sm text-muted-foreground mt-1">A clinician needs to assign patients to you.</p>
+              <p className="text-lg font-serif text-foreground mb-1">No Patients Assigned</p>
+              <p className="text-sm text-muted-foreground">A clinician needs to assign patients to you first.</p>
             </CardContent>
           </Card>
         ) : (
@@ -149,8 +144,8 @@ const CaregiverDashboard = () => {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {[
                 { label: "Patients", value: String(patients.length), icon: Users, color: "text-primary" },
-                { label: "Active Alerts", value: String(unresolvedAlerts.length), icon: AlertTriangle, color: unresolvedAlerts.length > 0 ? "text-coral" : "text-sage" },
-                { label: "With Vitals", value: String(Object.keys(vitals).length), icon: Activity, color: "text-lavender" },
+                { label: "Active Alerts", value: String(unresolvedAlerts.length), icon: AlertTriangle, color: unresolvedAlerts.length > 0 ? "text-destructive" : "text-[hsl(var(--sage))]" },
+                { label: "With Vitals", value: String(Object.keys(vitals).length), icon: Activity, color: "text-[hsl(var(--lavender))]" },
                 { label: "Avg Cognitive", value: Object.values(cogScores).length > 0 ? Math.round(Object.values(cogScores).reduce((a, b) => (a || 0) + (b || 0), 0)! / Object.values(cogScores).length) + "%" : "—", icon: Brain, color: "text-primary" },
               ].map((stat, i) => (
                 <motion.div key={stat.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
@@ -174,7 +169,6 @@ const CaregiverDashboard = () => {
                 <TabsTrigger value="alerts">Alerts ({unresolvedAlerts.length})</TabsTrigger>
               </TabsList>
 
-              {/* Overview Tab */}
               <TabsContent value="overview" className="space-y-4 mt-4">
                 {patients.map((p) => {
                   const v = vitals[p.patient_id];
@@ -199,29 +193,20 @@ const CaregiverDashboard = () => {
                             )}
                           </div>
 
-                          {/* Vitals Grid */}
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-                            <div className="bg-muted/50 rounded-lg p-3 text-center">
-                              <p className="text-xs text-muted-foreground">Heart Rate</p>
-                              <p className="text-lg font-serif text-foreground">{v?.pulse_rate || "—"}</p>
-                            </div>
-                            <div className="bg-muted/50 rounded-lg p-3 text-center">
-                              <p className="text-xs text-muted-foreground">Blood Pressure</p>
-                              <p className="text-lg font-serif text-foreground">
-                                {v?.blood_pressure_systolic ? `${v.blood_pressure_systolic}/${v.blood_pressure_diastolic}` : "—"}
-                              </p>
-                            </div>
-                            <div className="bg-muted/50 rounded-lg p-3 text-center">
-                              <p className="text-xs text-muted-foreground">Temperature</p>
-                              <p className="text-lg font-serif text-foreground">{v?.temperature ? `${Number(v.temperature).toFixed(1)}°C` : "—"}</p>
-                            </div>
-                            <div className="bg-muted/50 rounded-lg p-3 text-center">
-                              <p className="text-xs text-muted-foreground">O₂ Sat</p>
-                              <p className="text-lg font-serif text-foreground">{v?.oxygen_saturation ? `${Number(v.oxygen_saturation)}%` : "—"}</p>
-                            </div>
+                            {[
+                              { label: "Heart Rate", value: v?.pulse_rate || "—" },
+                              { label: "Blood Pressure", value: v?.blood_pressure_systolic ? `${v.blood_pressure_systolic}/${v.blood_pressure_diastolic}` : "—" },
+                              { label: "Temperature", value: v?.temperature ? `${Number(v.temperature).toFixed(1)}°C` : "—" },
+                              { label: "O₂ Sat", value: v?.oxygen_saturation ? `${Number(v.oxygen_saturation)}%` : "—" },
+                            ].map((item) => (
+                              <div key={item.label} className="bg-muted/50 rounded-lg p-3 text-center">
+                                <p className="text-xs text-muted-foreground">{item.label}</p>
+                                <p className="text-lg font-serif text-foreground">{item.value}</p>
+                              </div>
+                            ))}
                           </div>
 
-                          {/* Medications */}
                           {meds.length > 0 && (
                             <div className="mb-4">
                               <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
@@ -237,7 +222,6 @@ const CaregiverDashboard = () => {
                             </div>
                           )}
 
-                          {/* Actions */}
                           <div className="flex flex-wrap gap-2">
                             <Button size="sm" variant="outline" className="text-xs" onClick={() => navigate("/vitals")}>
                               <Eye className="w-3 h-3 mr-1" /> Vitals
@@ -256,12 +240,10 @@ const CaregiverDashboard = () => {
                 })}
               </TabsContent>
 
-              {/* Care Tasks Tab */}
               <TabsContent value="tasks" className="mt-4">
                 <CareTaskManager userId={user!.id} patientNames={patientNames} />
               </TabsContent>
 
-              {/* Communication Tab */}
               <TabsContent value="communication" className="mt-4">
                 <CommunicationLog
                   userId={user!.id}
@@ -271,26 +253,25 @@ const CaregiverDashboard = () => {
                 />
               </TabsContent>
 
-              {/* Alerts Tab */}
               <TabsContent value="alerts" className="mt-4">
                 <Card className="shadow-card">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-title">
-                      <Bell className="w-5 h-5 text-coral" />
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <Bell className="w-5 h-5 text-destructive" />
                       Emergency Alerts
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {alerts.length === 0 ? (
-                      <p className="text-sm text-muted-foreground py-4 text-center">No alerts</p>
+                      <p className="text-sm text-muted-foreground py-8 text-center">No alerts recorded</p>
                     ) : (
                       alerts.map((alert) => (
                         <div
                           key={alert.id}
                           className={`flex items-start gap-3 p-4 rounded-xl border-l-4 ${
-                            alert.is_resolved ? "border-l-sage bg-sage-light/50 opacity-60"
-                              : alert.severity === "critical" ? "border-l-destructive bg-coral-light"
-                              : "border-l-amber bg-amber-light"
+                            alert.is_resolved ? "border-l-[hsl(var(--sage))] bg-[hsl(var(--sage-light))]/50 opacity-60"
+                              : alert.severity === "critical" ? "border-l-destructive bg-[hsl(var(--coral-light))]"
+                              : "border-l-[hsl(var(--warm-amber))] bg-[hsl(var(--warm-amber-light))]"
                           }`}
                         >
                           <AlertTriangle className="w-5 h-5 mt-0.5 shrink-0" />
@@ -302,12 +283,13 @@ const CaregiverDashboard = () => {
                             <p className="text-sm text-foreground">{alert.message}</p>
                             <p className="text-xs text-muted-foreground mt-1">{new Date(alert.created_at).toLocaleString()}</p>
                           </div>
-                          {!alert.is_resolved && (
+                          {!alert.is_resolved ? (
                             <Button size="sm" variant="outline" onClick={() => resolveAlert(alert.id)}>
                               <CheckCircle2 className="w-4 h-4 mr-1" /> Resolve
                             </Button>
+                          ) : (
+                            <Badge className="bg-[hsl(var(--sage))]/10 text-[hsl(var(--sage))] text-xs">Resolved</Badge>
                           )}
-                          {alert.is_resolved && <Badge className="bg-sage/10 text-sage text-xs">Resolved</Badge>}
                         </div>
                       ))
                     )}
@@ -315,32 +297,6 @@ const CaregiverDashboard = () => {
                 </Card>
               </TabsContent>
             </Tabs>
-
-            {/* Quick Actions */}
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-              <Card className="shadow-card">
-                <CardContent className="p-5">
-                  <h3 className="font-serif text-title text-foreground mb-4">Quick Actions</h3>
-                  <div className="grid sm:grid-cols-4 gap-3">
-                    {[
-                      { label: "View Vitals", icon: Activity, path: "/vitals", color: "bg-calm-light text-calm" },
-                      { label: "AI Chat", icon: MessageCircle, path: "/chat", color: "bg-sage-light text-sage" },
-                      { label: "Documents", icon: FileText, path: "/documents", color: "bg-amber-light text-amber" },
-                      { label: "Notifications", icon: Bell, path: "/notifications", color: "bg-lavender-light text-lavender" },
-                    ].map((action) => (
-                      <button
-                        key={action.label}
-                        onClick={() => navigate(action.path)}
-                        className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:opacity-80 transition-opacity cursor-pointer`}
-                      >
-                        <action.icon className="w-7 h-7" />
-                        <span className="text-sm font-medium">{action.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
           </>
         )}
       </main>
