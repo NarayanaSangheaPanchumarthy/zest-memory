@@ -171,6 +171,50 @@ const PatientManagement = ({
     onReload();
   };
 
+  const handleAddPatient = async () => {
+    if (!newPatientName.trim()) { toast.error("Name is required"); return; }
+    if (!newPatientEmail.trim() || !newPatientEmail.includes("@")) { toast.error("Valid email is required"); return; }
+    if (newPatientName.trim().length > 100) { toast.error("Name must be under 100 characters"); return; }
+
+    setAddingPatient(true);
+    setTempPassword(null);
+    try {
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token;
+      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-patient`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          full_name: newPatientName.trim(),
+          email: newPatientEmail.trim(),
+          phone: newPatientPhone.trim() || null,
+        }),
+      });
+      const result = await resp.json();
+      if (!resp.ok) {
+        toast.error(result.error || "Failed to create patient");
+      } else {
+        toast.success(`Patient "${newPatientName.trim()}" created!`);
+        setTempPassword(result.temp_password);
+        onReload();
+      }
+    } catch (e) {
+      toast.error("Failed to create patient");
+    }
+    setAddingPatient(false);
+  };
+
+  const resetAddPatientForm = () => {
+    setNewPatientName("");
+    setNewPatientEmail("");
+    setNewPatientPhone("");
+    setTempPassword(null);
+    setAddPatientOpen(false);
+  };
+
   const getPatientAssignments = (patientId: string) =>
     assignments.filter((a) => a.patient_id === patientId);
 
