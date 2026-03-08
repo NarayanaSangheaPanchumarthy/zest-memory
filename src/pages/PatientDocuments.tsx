@@ -114,9 +114,13 @@ const PatientDocuments = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     {d.file_type && <Badge variant="secondary" className="text-xs">{d.file_type.split("/")[1]?.toUpperCase()}</Badge>}
-                    {d.file_url && (
-                      <Button variant="ghost" size="icon" asChild>
-                        <a href={d.file_url} target="_blank" rel="noopener noreferrer"><Download className="w-4 h-4" /></a>
+                    {d.file_path && (
+                      <Button variant="ghost" size="icon" onClick={async () => {
+                        const { data, error } = await supabase.storage.from("patient-documents").createSignedUrl(d.file_path!, 3600);
+                        if (error || !data?.signedUrl) { toast.error("Failed to generate download link"); return; }
+                        window.open(data.signedUrl, "_blank");
+                      }}>
+                        <Download className="w-4 h-4" />
                       </Button>
                     )}
                   </div>
