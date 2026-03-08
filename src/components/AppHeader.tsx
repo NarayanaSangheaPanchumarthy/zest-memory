@@ -1,27 +1,42 @@
-import { Brain, Phone, Bell, MessageCircle, Settings, LogOut, Menu, X } from "lucide-react";
+import { Brain, Phone, Bell, MessageCircle, Settings, LogOut, Menu, X, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Badge } from "@/components/ui/badge";
 
-const navItems = [
-  { label: "Patient", path: "/patient" },
-  { label: "Caregiver", path: "/caregiver" },
-  { label: "Clinical", path: "/clinical" },
-  { label: "Vitals", path: "/vitals" },
-  { label: "Documents", path: "/documents" },
-  { label: "Safety", path: "/safety" },
-  { label: "Games", path: "/games" },
-];
+const roleNavItems: Record<string, { label: string; path: string }[]> = {
+  patient: [
+    { label: "Dashboard", path: "/patient" },
+    { label: "Games", path: "/games" },
+    { label: "Vitals", path: "/vitals" },
+    { label: "Documents", path: "/documents" },
+    { label: "Safety", path: "/safety" },
+  ],
+  caregiver: [
+    { label: "Dashboard", path: "/caregiver" },
+    { label: "Vitals", path: "/vitals" },
+    { label: "Documents", path: "/documents" },
+    { label: "Safety", path: "/safety" },
+  ],
+  clinician: [
+    { label: "Dashboard", path: "/clinical" },
+    { label: "Caregiver View", path: "/caregiver" },
+    { label: "Vitals", path: "/vitals" },
+    { label: "Documents", path: "/documents" },
+    { label: "Safety", path: "/safety" },
+    { label: "Games", path: "/games" },
+  ],
+};
 
 const AppHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, signOut, profile } = useAuth();
+  const { user, signOut, profile, role } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const navItems = role ? roleNavItems[role] || [] : [];
 
   useEffect(() => {
     if (!user) return;
@@ -42,7 +57,7 @@ const AppHeader = () => {
           <div className="w-9 h-9 rounded-lg gradient-calm flex items-center justify-center">
             <Brain className="w-5 h-5 text-primary-foreground" />
           </div>
-          <span className="font-serif text-xl text-foreground">MemoGuard</span>
+          <span className="font-serif text-xl text-foreground hidden sm:inline">MemoGuard</span>
         </button>
 
         <nav className="hidden lg:flex items-center gap-1">
@@ -61,8 +76,8 @@ const AppHeader = () => {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/chat")} className="relative">
+        <div className="flex items-center gap-1.5">
+          <Button variant="ghost" size="icon" onClick={() => navigate("/chat")}>
             <MessageCircle className="w-5 h-5" />
           </Button>
           <Button variant="ghost" size="icon" onClick={() => navigate("/notifications")} className="relative">
@@ -76,10 +91,12 @@ const AppHeader = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate("/privacy")}>
             <Settings className="w-5 h-5" />
           </Button>
-          <Button variant="emergency" size="sm" className="gap-2 hidden sm:flex" onClick={() => navigate("/safety")}>
-            <Phone className="w-4 h-4" />
-            <span>Safety</span>
-          </Button>
+          {role === "patient" && (
+            <Button variant="emergency" size="sm" className="gap-2 hidden sm:flex" onClick={() => navigate("/safety")}>
+              <Phone className="w-4 h-4" />
+              <span>SOS</span>
+            </Button>
+          )}
           {user && (
             <Button variant="ghost" size="icon" onClick={handleSignOut} title="Sign out">
               <LogOut className="w-5 h-5" />
@@ -91,14 +108,13 @@ const AppHeader = () => {
         </div>
       </div>
 
-      {/* Mobile menu */}
       {menuOpen && (
         <div className="lg:hidden border-t border-border bg-card px-4 py-3 space-y-1">
           {navItems.map((item) => (
             <button
               key={item.path}
               onClick={() => { navigate(item.path); setMenuOpen(false); }}
-              className={`block w-full text-left px-3 py-2 rounded-lg text-sm font-medium ${
+              className={`block w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium ${
                 location.pathname === item.path ? "bg-primary/10 text-primary" : "text-muted-foreground"
               }`}
             >
@@ -107,7 +123,7 @@ const AppHeader = () => {
           ))}
           <button
             onClick={() => { navigate("/help"); setMenuOpen(false); }}
-            className="block w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground"
+            className="block w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground"
           >
             Help Desk
           </button>

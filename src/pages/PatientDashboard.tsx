@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import AppHeader from "@/components/AppHeader";
-import {
-  Mic, Brain, MessageCircle, Gamepad2, Clock, FileText
-} from "lucide-react";
+import { Mic, Brain, MessageCircle, Gamepad2, Clock, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
@@ -14,6 +13,7 @@ import DailyTaskChecklist from "@/components/patient/DailyTaskChecklist";
 import MedicationReminders from "@/components/patient/MedicationReminders";
 import MoodDiary from "@/components/patient/MoodDiary";
 import AppointmentCalendar from "@/components/patient/AppointmentCalendar";
+import EmergencySOS from "@/components/EmergencySOS";
 
 const PatientDashboard = () => {
   const { user, profile } = useAuth();
@@ -21,6 +21,7 @@ const PatientDashboard = () => {
   const [cogData, setCogData] = useState<{ date: string; accuracy: number }[]>([]);
   const [latestScore, setLatestScore] = useState<number | null>(null);
   const [trend, setTrend] = useState(0);
+  const [activeTab, setActiveTab] = useState("tasks");
 
   useEffect(() => {
     if (!user) return;
@@ -44,75 +45,95 @@ const PatientDashboard = () => {
 
   if (!user) return null;
 
+  const greeting = () => {
+    const h = new Date().getHours();
+    if (h < 12) return "Good morning";
+    if (h < 18) return "Good afternoon";
+    return "Good evening";
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         {/* Greeting */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-1">
-          <h1 className="text-heading text-foreground">Good morning, {profile?.full_name || "there"} 👋</h1>
-          <p className="text-accessible text-muted-foreground">
-            {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+          <h1 className="text-2xl sm:text-3xl font-serif text-foreground">
+            {greeting()}, {profile?.full_name || "there"} 👋
+          </h1>
+          <p className="text-muted-foreground">
+            {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
           </p>
         </motion.div>
 
-        {/* AI Assistant */}
+        {/* AI Assistant Card */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <Card className="gradient-calm border-0 overflow-hidden">
-            <CardContent className="p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6">
-              <div className="w-20 h-20 rounded-full bg-primary-foreground/20 flex items-center justify-center animate-pulse-gentle">
-                <Mic className="w-10 h-10 text-primary-foreground" />
+            <CardContent className="p-6 flex flex-col sm:flex-row items-center gap-5">
+              <div className="w-16 h-16 rounded-full bg-[hsl(0,0%,100%,0.2)] flex items-center justify-center shrink-0">
+                <Mic className="w-8 h-8 text-primary-foreground" />
               </div>
               <div className="text-center sm:text-left flex-1">
-                <h2 className="text-title text-primary-foreground mb-1">AI Assistant</h2>
-                <p className="text-primary-foreground/80 text-body-lg mb-4">
-                  I can help with reminders, memories, and emotional support.
+                <h2 className="text-lg font-serif text-primary-foreground mb-1">AI Care Assistant</h2>
+                <p className="text-primary-foreground/80 text-sm mb-3">
+                  Get help with reminders, memories, emotional support, and daily questions.
                 </p>
-                <Button variant="outline" size="lg" className="bg-primary-foreground/20 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/30 hover:text-primary-foreground" onClick={() => navigate("/chat")}>
-                  <MessageCircle className="w-5 h-5 mr-2" /> Start Talking
+                <Button
+                  variant="outline"
+                  className="bg-[hsl(0,0%,100%,0.2)] border-[hsl(0,0%,100%,0.3)] text-primary-foreground hover:bg-[hsl(0,0%,100%,0.3)] hover:text-primary-foreground"
+                  onClick={() => navigate("/chat")}
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" /> Talk to AI
                 </Button>
               </div>
             </CardContent>
           </Card>
         </motion.div>
 
-        {/* Main Grid */}
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Left Column */}
-          <div className="space-y-6">
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+        {/* Main Tabs */}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="w-full justify-start overflow-x-auto">
+              <TabsTrigger value="tasks">Daily Tasks</TabsTrigger>
+              <TabsTrigger value="medications">Medications</TabsTrigger>
+              <TabsTrigger value="mood">Mood Diary</TabsTrigger>
+              <TabsTrigger value="appointments">Appointments</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="tasks" className="mt-4">
               <DailyTaskChecklist userId={user.id} />
-            </motion.div>
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+            </TabsContent>
+
+            <TabsContent value="medications" className="mt-4">
               <MedicationReminders userId={user.id} />
-            </motion.div>
-          </div>
+            </TabsContent>
 
-          {/* Right Column */}
-          <div className="space-y-6">
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+            <TabsContent value="mood" className="mt-4">
               <MoodDiary userId={user.id} />
-            </motion.div>
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
-              <AppointmentCalendar userId={user.id} />
-            </motion.div>
-          </div>
-        </div>
+            </TabsContent>
 
-        {/* Cognitive Trends + Quick Actions */}
+            <TabsContent value="appointments" className="mt-4">
+              <AppointmentCalendar userId={user.id} />
+            </TabsContent>
+          </Tabs>
+        </motion.div>
+
+        {/* Bottom Row: Cognitive + Quick Actions */}
         <div className="grid md:grid-cols-2 gap-6">
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-            <Card className="shadow-card">
-              <CardContent className="p-5 space-y-3">
-                <div className="flex items-center gap-2">
-                  <Brain className="w-5 h-5 text-lavender" />
-                  <h3 className="font-serif text-title text-foreground">Cognitive Trends</h3>
-                </div>
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+            <Card className="shadow-card h-full">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Brain className="w-5 h-5 text-[hsl(var(--lavender))]" />
+                  Cognitive Trends
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
                 {cogData.length > 0 ? (
                   <>
-                    <div className="flex items-end gap-2">
+                    <div className="flex items-end gap-2 mb-3">
                       <span className="text-3xl font-serif text-foreground">{latestScore}%</span>
-                      <span className={`text-sm font-medium mb-1 ${trend >= 0 ? "text-sage" : "text-destructive"}`}>
+                      <span className={`text-sm font-medium mb-1 ${trend >= 0 ? "text-[hsl(var(--sage))]" : "text-destructive"}`}>
                         {trend >= 0 ? "+" : ""}{trend}%
                       </span>
                     </div>
@@ -123,28 +144,36 @@ const PatientDashboard = () => {
                           <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
                           <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
                           <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />
-                          <Line type="monotone" dataKey="accuracy" stroke="hsl(var(--lavender))" strokeWidth={2} dot={{ r: 2 }} />
+                          <Line type="monotone" dataKey="accuracy" stroke="hsl(260, 30%, 60%)" strokeWidth={2} dot={{ r: 2 }} />
                         </LineChart>
                       </ResponsiveContainer>
                     </div>
                   </>
                 ) : (
-                  <p className="text-sm text-muted-foreground">Play memory games to track your trends!</p>
+                  <div className="py-8 text-center">
+                    <Brain className="w-10 h-10 mx-auto mb-3 text-muted-foreground/30" />
+                    <p className="text-sm text-muted-foreground">Play memory games to track your cognitive trends!</p>
+                    <Button variant="outline" size="sm" className="mt-3" onClick={() => navigate("/games")}>
+                      <Gamepad2 className="w-4 h-4 mr-2" /> Play Games
+                    </Button>
+                  </div>
                 )}
               </CardContent>
             </Card>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
-            <Card className="shadow-card">
-              <CardContent className="p-5">
-                <h3 className="font-serif text-title text-foreground mb-4">Quick Actions</h3>
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
+            <Card className="shadow-card h-full">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent>
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { label: "Memory Games", icon: Gamepad2, color: "bg-calm-light text-calm", path: "/games" },
-                    { label: "AI Chat", icon: MessageCircle, color: "bg-sage-light text-sage", path: "/chat" },
-                    { label: "My Documents", icon: FileText, color: "bg-amber-light text-amber", path: "/documents" },
-                    { label: "My Vitals", icon: Clock, color: "bg-lavender-light text-lavender", path: "/vitals" },
+                    { label: "Memory Games", icon: Gamepad2, color: "bg-[hsl(200,40%,92%)] text-[hsl(200,35%,45%)]", path: "/games" },
+                    { label: "AI Chat", icon: MessageCircle, color: "bg-[hsl(150,25%,92%)] text-[hsl(150,20%,50%)]", path: "/chat" },
+                    { label: "My Documents", icon: FileText, color: "bg-[hsl(35,80%,93%)] text-[hsl(35,80%,55%)]", path: "/documents" },
+                    { label: "My Vitals", icon: Clock, color: "bg-[hsl(260,35%,93%)] text-[hsl(260,30%,60%)]", path: "/vitals" },
                   ].map((action) => (
                     <button
                       key={action.label}
@@ -161,6 +190,7 @@ const PatientDashboard = () => {
           </motion.div>
         </div>
       </main>
+      <EmergencySOS />
     </div>
   );
 };
