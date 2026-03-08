@@ -12,7 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-type Doc = { id: string; title: string; description: string | null; file_url: string | null; file_type: string | null; created_at: string };
+type Doc = { id: string; title: string; description: string | null; file_path: string | null; file_type: string | null; created_at: string };
 
 const PatientDocuments = () => {
   const { user } = useAuth();
@@ -25,8 +25,9 @@ const PatientDocuments = () => {
 
   const fetchDocs = async () => {
     if (!user) return;
-    const { data } = await supabase.from("patient_documents").select("*").eq("patient_id", user.id).order("created_at", { ascending: false });
-    if (data) setDocs(data);
+    const { data } = await supabase.from("patient_documents").select("id, title, description, file_url, file_type, created_at").eq("patient_id", user.id).order("created_at", { ascending: false });
+    // file_url stores the storage path, not a public URL
+    if (data) setDocs(data.map(d => ({ ...d, file_path: d.file_url })));
   };
 
   useEffect(() => { fetchDocs(); }, [user]);
@@ -41,8 +42,8 @@ const PatientDocuments = () => {
       const filePath = `${user.id}/${Date.now()}_${file.name}`;
       const { error: uploadErr } = await supabase.storage.from("patient-documents").upload(filePath, file);
       if (uploadErr) { toast.error("File upload failed"); setLoading(false); return; }
-      const { data: urlData } = supabase.storage.from("patient-documents").getPublicUrl(filePath);
-      fileUrl = urlData.publicUrl;
+      // Store the path, not a public URL — we'll generate signed URLs on-the-fly
+      fileUrl = filePath;
       fileType = file.type;
     }
 
@@ -113,9 +114,13 @@ const PatientDocuments = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     {d.file_type && <Badge variant="secondary" className="text-xs">{d.file_type.split("/")[1]?.toUpperCase()}</Badge>}
-                    {d.file_url && (
-                      <Button variant="ghost" size="icon" asChild>
-                        <a href={d.file_url} target="_blank" rel="noopener noreferrer"><Download className="w-4 h-4" /></a>
+                    {d.file_path && (
+                      <Button variant="ghost" size="icon" onClick={async () => {
+                        const { data, error } = await supabase.storage.from("patient-documents").createSignedUrl(d.file_path!, 3600);
+                        if (error || !data?.signedUrl) { toast.error("Failed to generate download link"); return; }
+                        window.open(data.signedUrl, "_blank");
+                      }}>
+                        <Download className="w-4 h-4" />
                       </Button>
                     )}
                   </div>
