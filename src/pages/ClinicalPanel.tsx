@@ -1,30 +1,25 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
 import AppHeader from "@/components/AppHeader";
 import {
-  Brain, TrendingDown, Users, FileText, Download,
-  AlertTriangle, Activity, BarChart3, UserPlus, Loader2,
-  CheckCircle2, Eye, MapPin, Trash2
+  Brain, TrendingDown, AlertTriangle, Activity, Loader2,
+  CheckCircle2, BarChart3
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, AreaChart, Area
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer
 } from "recharts";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import PatientManagement from "@/components/clinical/PatientManagement";
 
 interface PatientData {
   patient_id: string;
   full_name: string;
+  phone?: string | null;
   latestVitals: any | null;
   cogScore: number | null;
   cogTrend: { date: string; accuracy: number }[];
@@ -33,16 +28,12 @@ interface PatientData {
 
 const ClinicalPanel = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [patients, setPatients] = useState<PatientData[]>([]);
   const [allAlerts, setAllAlerts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
-  const [allProfiles, setAllProfiles] = useState<{ user_id: string; full_name: string }[]>([]);
+  const [allProfiles, setAllProfiles] = useState<{ user_id: string; full_name: string; phone?: string | null }[]>([]);
   const [allRoles, setAllRoles] = useState<{ user_id: string; role: string }[]>([]);
   const [assignments, setAssignments] = useState<{ id: string; patient_id: string; assigned_user_id: string }[]>([]);
-  const [selectedPatient, setSelectedPatient] = useState("");
-  const [selectedCaregiver, setSelectedCaregiver] = useState("");
 
   useEffect(() => {
     if (!user) return;
@@ -53,18 +44,15 @@ const ClinicalPanel = () => {
     if (!user) return;
     setLoading(true);
 
-    // Get all assignments for this clinician
     const { data: myAssignments } = await supabase
       .from("patient_assignments")
       .select("id, patient_id, assigned_user_id");
 
     setAssignments(myAssignments || []);
-
     const patientIds = [...new Set((myAssignments || []).map((a) => a.patient_id))];
 
-    // Load all profiles and roles for assignment management
     const [profilesRes, rolesRes] = await Promise.all([
-      supabase.from("profiles").select("user_id, full_name"),
+      supabase.from("profiles").select("user_id, full_name, phone"),
       supabase.from("user_roles").select("user_id, role"),
     ]);
 
@@ -76,7 +64,6 @@ const ClinicalPanel = () => {
       return;
     }
 
-    // Load patient data
     const [vitalsRes, alertsRes, gamesRes] = await Promise.all([
       supabase.from("patient_vitals").select("*").in("patient_id", patientIds).order("recorded_at", { ascending: false }).limit(100),
       supabase.from("emergency_alerts").select("*").in("patient_id", patientIds).order("created_at", { ascending: false }).limit(50),
@@ -85,9 +72,8 @@ const ClinicalPanel = () => {
 
     setAllAlerts(alertsRes.data || []);
 
-    // Build patient data
-    const profileMap: Record<string, string> = {};
-    (profilesRes.data || []).forEach((p) => { profileMap[p.user_id] = p.full_name; });
+    const profileMap: Record<string, { name: string; phone: string | null }> = {};
+    (profilesRes.data || []).forEach((p) => { profileMap[p.user_id] = { name: p.full_name, phone: p.phone }; });
 
     const latestVitalsMap: Record<string, any> = {};
     (vitalsRes.data || []).forEach((v) => {
@@ -113,7 +99,8 @@ const ClinicalPanel = () => {
       const latestScore = trends.length > 0 ? trends[trends.length - 1].accuracy : null;
       return {
         patient_id: id,
-        full_name: profileMap[id] || "Unknown",
+        full_name: profileMap[id]?.name || "Unknown",
+        phone: profileMap[id]?.phone,
         latestVitals: latestVitalsMap[id] || null,
         cogScore: latestScore,
         cogTrend: trends,
@@ -125,54 +112,17 @@ const ClinicalPanel = () => {
     setLoading(false);
   };
 
-  const handleAssign = async () => {
-    if (!selectedPatient || !selectedCaregiver) {
-      toast.error("Please select both a patient and a caregiver/clinician");
-      return;
-    }
-    const { error } = await supabase.from("patient_assignments").insert({
-      patient_id: selectedPatient,
-      assigned_user_id: selectedCaregiver,
-    });
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    toast.success("Assignment created!");
-    setAssignDialogOpen(false);
-    setSelectedPatient("");
-    setSelectedCaregiver("");
-    loadData();
-  };
-
-  const removeAssignment = async (id: string) => {
-    const { error } = await supabase.from("patient_assignments").delete().eq("id", id);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    toast.success("Assignment removed");
-    loadData();
-  };
-
   const resolveAlert = async (alertId: string) => {
-    await supabase.from("emergency_alerts").update({ is_resolved: true, resolved_by: user?.id, resolved_at: new Date().toISOString() }).eq("id", alertId);
+    await supabase.from("emergency_alerts").update({
+      is_resolved: true, resolved_by: user?.id, resolved_at: new Date().toISOString(),
+    }).eq("id", alertId);
     setAllAlerts((prev) => prev.map((a) => (a.id === alertId ? { ...a, is_resolved: true } : a)));
   };
-
-  const patientProfiles = allProfiles.filter((p) =>
-    allRoles.some((r) => r.user_id === p.user_id && r.role === "patient")
-  );
-  const caregiverProfiles = allProfiles.filter((p) =>
-    allRoles.some((r) => r.user_id === p.user_id && (r.role === "caregiver" || r.role === "clinician"))
-  );
 
   const totalAlerts = allAlerts.filter((a) => !a.is_resolved).length;
   const avgScore = patients.length > 0
     ? Math.round(patients.filter((p) => p.cogScore != null).reduce((sum, p) => sum + (p.cogScore || 0), 0) / Math.max(patients.filter((p) => p.cogScore != null).length, 1))
     : null;
-
-  // Aggregate cognitive trend for chart (first patient with data)
   const patientWithTrend = patients.find((p) => p.cogTrend.length > 1);
 
   if (loading) {
@@ -190,61 +140,17 @@ const ClinicalPanel = () => {
     <div className="min-h-screen bg-background">
       <AppHeader />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-        >
-          <div>
-            <h1 className="text-heading text-foreground">Clinical Insights</h1>
-            <p className="text-accessible text-muted-foreground">
-              Patient management, analytics & risk assessment
-            </p>
-          </div>
-          <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="default" className="gap-2">
-                <UserPlus className="w-4 h-4" />
-                Assign Caregiver
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Assign Caregiver to Patient</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 pt-2">
-                <div className="space-y-2">
-                  <Label>Patient</Label>
-                  <Select value={selectedPatient} onValueChange={setSelectedPatient}>
-                    <SelectTrigger><SelectValue placeholder="Select a patient" /></SelectTrigger>
-                    <SelectContent>
-                      {patientProfiles.map((p) => (
-                        <SelectItem key={p.user_id} value={p.user_id}>{p.full_name || p.user_id.slice(0, 8)}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Caregiver / Clinician</Label>
-                  <Select value={selectedCaregiver} onValueChange={setSelectedCaregiver}>
-                    <SelectTrigger><SelectValue placeholder="Select a caregiver" /></SelectTrigger>
-                    <SelectContent>
-                      {caregiverProfiles.map((p) => (
-                        <SelectItem key={p.user_id} value={p.user_id}>{p.full_name || p.user_id.slice(0, 8)}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button onClick={handleAssign} className="w-full">Create Assignment</Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <h1 className="text-heading text-foreground">Clinical Insights</h1>
+          <p className="text-accessible text-muted-foreground">
+            Patient management, analytics & risk assessment
+          </p>
         </motion.div>
 
         {/* Overview Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: "Total Patients", value: String(patients.length), icon: Users, color: "text-primary" },
+            { label: "Total Patients", value: String(patients.length), icon: BarChart3, color: "text-primary" },
             { label: "Avg. Cognitive Score", value: avgScore != null ? avgScore + "%" : "—", icon: Brain, color: "text-lavender" },
             { label: "Active Alerts", value: String(totalAlerts), icon: AlertTriangle, color: totalAlerts > 0 ? "text-coral" : "text-sage" },
             { label: "Assignments", value: String(assignments.length), icon: Activity, color: "text-sage" },
@@ -345,125 +251,17 @@ const ClinicalPanel = () => {
           </motion.div>
         </div>
 
-        {/* Patient Registry */}
+        {/* Patient Management */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-          <Card className="shadow-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-title">
-                <Users className="w-5 h-5 text-primary" />
-                Patient Registry
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {patients.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Users className="w-12 h-12 mx-auto mb-4 opacity-30" />
-                  <p>No patients assigned yet. Use "Assign Caregiver" to create assignments.</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left">
-                    <thead>
-                      <tr className="border-b border-border">
-                        <th className="pb-3 text-sm font-medium text-muted-foreground">Patient</th>
-                        <th className="pb-3 text-sm font-medium text-muted-foreground">Cognitive Score</th>
-                        <th className="pb-3 text-sm font-medium text-muted-foreground">Latest Vitals</th>
-                        <th className="pb-3 text-sm font-medium text-muted-foreground">Alerts</th>
-                        <th className="pb-3 text-sm font-medium text-muted-foreground">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {patients.map((p) => (
-                        <tr key={p.patient_id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
-                          <td className="py-4 font-medium text-foreground">{p.full_name}</td>
-                          <td className="py-4">
-                            {p.cogScore != null ? (
-                              <span className="font-serif text-lg text-foreground">{Math.round(p.cogScore)}%</span>
-                            ) : (
-                              <span className="text-muted-foreground text-sm">—</span>
-                            )}
-                          </td>
-                          <td className="py-4">
-                            {p.latestVitals ? (
-                              <div className="text-xs text-muted-foreground space-x-2">
-                                {p.latestVitals.pulse_rate && <span>❤️ {p.latestVitals.pulse_rate}</span>}
-                                {p.latestVitals.blood_pressure_systolic && (
-                                  <span>🩸 {p.latestVitals.blood_pressure_systolic}/{p.latestVitals.blood_pressure_diastolic}</span>
-                                )}
-                                {p.latestVitals.oxygen_saturation && <span>💨 {Number(p.latestVitals.oxygen_saturation)}%</span>}
-                              </div>
-                            ) : (
-                              <span className="text-muted-foreground text-sm">No data</span>
-                            )}
-                          </td>
-                          <td className="py-4">
-                            {p.unresolvedAlerts > 0 ? (
-                              <Badge className="bg-coral-light text-coral">{p.unresolvedAlerts} active</Badge>
-                            ) : (
-                              <Badge className="bg-sage-light text-sage">Clear</Badge>
-                            )}
-                          </td>
-                          <td className="py-4">
-                            <div className="flex gap-1">
-                              <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => navigate("/vitals")}>
-                                <Eye className="w-3 h-3 mr-1" /> Vitals
-                              </Button>
-                              <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => navigate("/documents")}>
-                                <FileText className="w-3 h-3 mr-1" /> Docs
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Assignment Management */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
-          <Card className="shadow-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-title">
-                <UserPlus className="w-5 h-5 text-sage" />
-                Current Assignments
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {assignments.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">No assignments yet</p>
-              ) : (
-                <div className="space-y-2">
-                  {assignments.map((a) => {
-                    const patientName = allProfiles.find((p) => p.user_id === a.patient_id)?.full_name || a.patient_id.slice(0, 8);
-                    const caregiverName = allProfiles.find((p) => p.user_id === a.assigned_user_id)?.full_name || a.assigned_user_id.slice(0, 8);
-                    const caregiverRole = allRoles.find((r) => r.user_id === a.assigned_user_id)?.role || "unknown";
-                    return (
-                      <div key={a.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                        <div className="flex items-center gap-3">
-                          <div>
-                            <p className="text-sm font-medium text-foreground">{patientName}</p>
-                            <p className="text-xs text-muted-foreground">Patient</p>
-                          </div>
-                          <span className="text-muted-foreground">→</span>
-                          <div>
-                            <p className="text-sm font-medium text-foreground">{caregiverName}</p>
-                            <p className="text-xs text-muted-foreground capitalize">{caregiverRole}</p>
-                          </div>
-                        </div>
-                        <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => removeAssignment(a.id)}>
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <PatientManagement
+            patients={patients}
+            allProfiles={allProfiles}
+            allRoles={allRoles}
+            assignments={assignments}
+            allAlerts={allAlerts}
+            onReload={loadData}
+            currentUserId={user?.id || ""}
+          />
         </motion.div>
       </main>
     </div>
