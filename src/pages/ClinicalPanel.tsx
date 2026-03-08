@@ -137,11 +137,16 @@ const ClinicalPanel = () => {
     <div className="min-h-screen bg-background">
       <AppHeader />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <h1 className="text-2xl sm:text-3xl font-serif text-foreground">Clinical Dashboard</h1>
-          <p className="text-muted-foreground">
-            AI-powered patient management, analytics & risk assessment
-          </p>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-serif text-foreground">Clinical Dashboard</h1>
+            <p className="text-muted-foreground">
+              AI-powered patient management, analytics & risk assessment
+            </p>
+          </div>
+          {patients.length > 0 && (
+            <PatientRoutineManager patients={patients.map(p => ({ patient_id: p.patient_id, full_name: p.full_name }))} />
+          )}
         </motion.div>
 
         {/* Stats */}
