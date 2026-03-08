@@ -74,6 +74,42 @@ export type Database = {
         }
         Relationships: []
       }
+      game_sessions: {
+        Row: {
+          accuracy: number | null
+          created_at: string
+          difficulty: string
+          duration_seconds: number | null
+          game_type: string
+          id: string
+          max_score: number
+          patient_id: string
+          score: number
+        }
+        Insert: {
+          accuracy?: number | null
+          created_at?: string
+          difficulty?: string
+          duration_seconds?: number | null
+          game_type?: string
+          id?: string
+          max_score?: number
+          patient_id: string
+          score?: number
+        }
+        Update: {
+          accuracy?: number | null
+          created_at?: string
+          difficulty?: string
+          duration_seconds?: number | null
+          game_type?: string
+          id?: string
+          max_score?: number
+          patient_id?: string
+          score?: number
+        }
+        Relationships: []
+      }
       geofence_zones: {
         Row: {
           created_at: string
