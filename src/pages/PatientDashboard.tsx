@@ -31,7 +31,8 @@ const fadeUp = {
 };
 
 const PatientDashboard = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const navigate = useNavigate();
   const [cogData, setCogData] = useState<{ date: string; accuracy: number }[]>([]);
   const [latestScore, setLatestScore] = useState<number | null>(null);
   const [trend, setTrend] = useState(0);
