@@ -233,6 +233,7 @@ const Index = () => {
     { label: "Who", id: "who" },
     { label: "When", id: "when" },
     { label: "Where", id: "where" },
+    { label: "FAQ", id: "faq" },
   ];
 
   return (
