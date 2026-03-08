@@ -4,15 +4,17 @@ import { useNavigate } from "react-router-dom";
 import AppHeader from "@/components/AppHeader";
 import EmergencySOS from "@/components/EmergencySOS";
 import {
-  Bell, Pill, Activity, MapPin, MessageCircle,
-  TrendingUp, AlertTriangle, CheckCircle2, Heart,
-  Brain, FileText, Eye, Users, Loader2
+  Bell, Activity, MapPin, MessageCircle, AlertTriangle,
+  CheckCircle2, Heart, Brain, FileText, Eye, Users, Loader2, Pill
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import CareTaskManager from "@/components/caregiver/CareTaskManager";
+import CommunicationLog from "@/components/caregiver/CommunicationLog";
 
 interface AssignedPatient {
   patient_id: string;
@@ -39,12 +41,6 @@ interface AlertRecord {
   created_at: string;
 }
 
-interface GameRecord {
-  patient_id: string;
-  accuracy: number | null;
-  created_at: string;
-}
-
 const CaregiverDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -52,7 +48,9 @@ const CaregiverDashboard = () => {
   const [vitals, setVitals] = useState<Record<string, VitalRecord>>({});
   const [alerts, setAlerts] = useState<AlertRecord[]>([]);
   const [cogScores, setCogScores] = useState<Record<string, number | null>>({});
+  const [medications, setMedications] = useState<Record<string, any[]>>({});
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
     if (!user) return;
@@ -63,55 +61,40 @@ const CaregiverDashboard = () => {
     if (!user) return;
     setLoading(true);
 
-    // 1. Get assigned patients
     const { data: assignments } = await supabase
       .from("patient_assignments")
       .select("patient_id")
       .eq("assigned_user_id", user.id);
 
-    if (!assignments || assignments.length === 0) {
-      setLoading(false);
-      return;
-    }
-
+    if (!assignments || assignments.length === 0) { setLoading(false); return; }
     const patientIds = assignments.map((a) => a.patient_id);
 
-    // 2. Fetch profiles, latest vitals, alerts, and game sessions in parallel
-    const [profilesRes, vitalsRes, alertsRes, gamesRes] = await Promise.all([
+    const [profilesRes, vitalsRes, alertsRes, gamesRes, medsRes] = await Promise.all([
       supabase.from("profiles").select("user_id, full_name, phone").in("user_id", patientIds),
       supabase.from("patient_vitals").select("*").in("patient_id", patientIds).order("recorded_at", { ascending: false }).limit(50),
       supabase.from("emergency_alerts").select("*").in("patient_id", patientIds).order("created_at", { ascending: false }).limit(20),
       supabase.from("game_sessions").select("patient_id, accuracy, created_at").in("patient_id", patientIds).order("created_at", { ascending: false }).limit(50),
+      supabase.from("medications").select("*").in("patient_id", patientIds).eq("is_active", true),
     ]);
 
-    // Map profiles
     const profileMap: Record<string, { full_name: string; phone: string | null }> = {};
-    profilesRes.data?.forEach((p) => {
-      profileMap[p.user_id] = { full_name: p.full_name, phone: p.phone };
-    });
+    profilesRes.data?.forEach((p) => { profileMap[p.user_id] = { full_name: p.full_name, phone: p.phone }; });
 
-    const mappedPatients: AssignedPatient[] = patientIds.map((id) => ({
-      patient_id: id,
-      profile: profileMap[id] || null,
-    }));
-    setPatients(mappedPatients);
+    setPatients(patientIds.map((id) => ({ patient_id: id, profile: profileMap[id] || null })));
 
-    // Latest vitals per patient
     const latestVitals: Record<string, VitalRecord> = {};
-    vitalsRes.data?.forEach((v) => {
-      if (!latestVitals[v.patient_id]) latestVitals[v.patient_id] = v as VitalRecord;
-    });
+    vitalsRes.data?.forEach((v) => { if (!latestVitals[v.patient_id]) latestVitals[v.patient_id] = v as VitalRecord; });
     setVitals(latestVitals);
 
-    // Alerts
     setAlerts((alertsRes.data || []) as AlertRecord[]);
 
-    // Latest cognitive score per patient
     const latestScores: Record<string, number | null> = {};
-    gamesRes.data?.forEach((g) => {
-      if (!(g.patient_id in latestScores)) latestScores[g.patient_id] = g.accuracy;
-    });
+    gamesRes.data?.forEach((g) => { if (!(g.patient_id in latestScores)) latestScores[g.patient_id] = g.accuracy; });
     setCogScores(latestScores);
+
+    const medsMap: Record<string, any[]> = {};
+    medsRes.data?.forEach((m) => { if (!medsMap[m.patient_id]) medsMap[m.patient_id] = []; medsMap[m.patient_id].push(m); });
+    setMedications(medsMap);
 
     setLoading(false);
   };
@@ -123,6 +106,12 @@ const CaregiverDashboard = () => {
 
   const unresolvedAlerts = alerts.filter((a) => !a.is_resolved);
   const patientName = (id: string) => patients.find((p) => p.patient_id === id)?.profile?.full_name || "Unknown";
+  const patientNames: Record<string, string> = {};
+  patients.forEach(p => { patientNames[p.patient_id] = p.profile?.full_name || "Unknown"; });
+
+  const profileNames: Record<string, string> = {};
+  patients.forEach(p => { if (p.profile) profileNames[p.patient_id] = p.profile.full_name; });
+  if (user) profileNames[user.id] = "You";
 
   if (loading) {
     return (
@@ -142,7 +131,7 @@ const CaregiverDashboard = () => {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <h1 className="text-heading text-foreground">Caregiver Dashboard</h1>
           <p className="text-accessible text-muted-foreground">
-            Monitoring {patients.length} assigned patient{patients.length !== 1 ? "s" : ""}
+            Managing {patients.length} patient{patients.length !== 1 ? "s" : ""}
           </p>
         </motion.div>
 
@@ -156,20 +145,18 @@ const CaregiverDashboard = () => {
           </Card>
         ) : (
           <>
-            {/* Stats Overview */}
+            {/* Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {[
-                { label: "Assigned Patients", value: String(patients.length), icon: Users, color: "text-primary" },
+                { label: "Patients", value: String(patients.length), icon: Users, color: "text-primary" },
                 { label: "Active Alerts", value: String(unresolvedAlerts.length), icon: AlertTriangle, color: unresolvedAlerts.length > 0 ? "text-coral" : "text-sage" },
-                { label: "Patients with Vitals", value: String(Object.keys(vitals).length), icon: Activity, color: "text-lavender" },
-                { label: "Avg. Cognitive Score", value: Object.values(cogScores).length > 0 ? Math.round(Object.values(cogScores).reduce((a, b) => (a || 0) + (b || 0), 0)! / Object.values(cogScores).length).toString() + "%" : "—", icon: Brain, color: "text-primary" },
+                { label: "With Vitals", value: String(Object.keys(vitals).length), icon: Activity, color: "text-lavender" },
+                { label: "Avg Cognitive", value: Object.values(cogScores).length > 0 ? Math.round(Object.values(cogScores).reduce((a, b) => (a || 0) + (b || 0), 0)! / Object.values(cogScores).length) + "%" : "—", icon: Brain, color: "text-primary" },
               ].map((stat, i) => (
                 <motion.div key={stat.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
                   <Card className="shadow-card">
                     <CardContent className="p-5">
-                      <div className="flex items-center justify-between mb-3">
-                        <stat.icon className={`w-5 h-5 ${stat.color}`} />
-                      </div>
+                      <stat.icon className={`w-5 h-5 ${stat.color} mb-2`} />
                       <p className="text-2xl font-serif text-foreground">{stat.value}</p>
                       <p className="text-sm text-muted-foreground">{stat.label}</p>
                     </CardContent>
@@ -178,36 +165,135 @@ const CaregiverDashboard = () => {
               ))}
             </div>
 
-            <div className="grid lg:grid-cols-3 gap-6">
-              {/* Alerts */}
-              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="lg:col-span-2">
+            {/* Main Tabs */}
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList>
+                <TabsTrigger value="overview">Patient Overview</TabsTrigger>
+                <TabsTrigger value="tasks">Care Tasks</TabsTrigger>
+                <TabsTrigger value="communication">Communication</TabsTrigger>
+                <TabsTrigger value="alerts">Alerts ({unresolvedAlerts.length})</TabsTrigger>
+              </TabsList>
+
+              {/* Overview Tab */}
+              <TabsContent value="overview" className="space-y-4 mt-4">
+                {patients.map((p) => {
+                  const v = vitals[p.patient_id];
+                  const score = cogScores[p.patient_id];
+                  const meds = medications[p.patient_id] || [];
+                  return (
+                    <motion.div key={p.patient_id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+                      <Card className="shadow-card">
+                        <CardContent className="p-5">
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                <span className="font-semibold text-primary">{(p.profile?.full_name || "U").charAt(0)}</span>
+                              </div>
+                              <div>
+                                <p className="font-medium text-foreground">{p.profile?.full_name || "Unknown"}</p>
+                                {p.profile?.phone && <p className="text-xs text-muted-foreground">{p.profile.phone}</p>}
+                              </div>
+                            </div>
+                            {score != null && (
+                              <Badge variant="secondary"><Brain className="w-3 h-3 mr-1" />{Math.round(score)}%</Badge>
+                            )}
+                          </div>
+
+                          {/* Vitals Grid */}
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                            <div className="bg-muted/50 rounded-lg p-3 text-center">
+                              <p className="text-xs text-muted-foreground">Heart Rate</p>
+                              <p className="text-lg font-serif text-foreground">{v?.pulse_rate || "—"}</p>
+                            </div>
+                            <div className="bg-muted/50 rounded-lg p-3 text-center">
+                              <p className="text-xs text-muted-foreground">Blood Pressure</p>
+                              <p className="text-lg font-serif text-foreground">
+                                {v?.blood_pressure_systolic ? `${v.blood_pressure_systolic}/${v.blood_pressure_diastolic}` : "—"}
+                              </p>
+                            </div>
+                            <div className="bg-muted/50 rounded-lg p-3 text-center">
+                              <p className="text-xs text-muted-foreground">Temperature</p>
+                              <p className="text-lg font-serif text-foreground">{v?.temperature ? `${Number(v.temperature).toFixed(1)}°C` : "—"}</p>
+                            </div>
+                            <div className="bg-muted/50 rounded-lg p-3 text-center">
+                              <p className="text-xs text-muted-foreground">O₂ Sat</p>
+                              <p className="text-lg font-serif text-foreground">{v?.oxygen_saturation ? `${Number(v.oxygen_saturation)}%` : "—"}</p>
+                            </div>
+                          </div>
+
+                          {/* Medications */}
+                          {meds.length > 0 && (
+                            <div className="mb-4">
+                              <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
+                                <Pill className="w-3 h-3" /> Current Medications
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {meds.map((m) => (
+                                  <Badge key={m.id} variant="secondary" className="text-xs">
+                                    {m.name} {m.dosage && `(${m.dosage})`}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Actions */}
+                          <div className="flex flex-wrap gap-2">
+                            <Button size="sm" variant="outline" className="text-xs" onClick={() => navigate("/vitals")}>
+                              <Eye className="w-3 h-3 mr-1" /> Vitals
+                            </Button>
+                            <Button size="sm" variant="outline" className="text-xs" onClick={() => navigate("/safety")}>
+                              <MapPin className="w-3 h-3 mr-1" /> Location
+                            </Button>
+                            <Button size="sm" variant="outline" className="text-xs" onClick={() => navigate("/documents")}>
+                              <FileText className="w-3 h-3 mr-1" /> Docs
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  );
+                })}
+              </TabsContent>
+
+              {/* Care Tasks Tab */}
+              <TabsContent value="tasks" className="mt-4">
+                <CareTaskManager userId={user!.id} patientNames={patientNames} />
+              </TabsContent>
+
+              {/* Communication Tab */}
+              <TabsContent value="communication" className="mt-4">
+                <CommunicationLog
+                  userId={user!.id}
+                  patientIds={patients.map(p => p.patient_id)}
+                  patientNames={patientNames}
+                  profileNames={profileNames}
+                />
+              </TabsContent>
+
+              {/* Alerts Tab */}
+              <TabsContent value="alerts" className="mt-4">
                 <Card className="shadow-card">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-title">
-                      <Bell className="w-5 h-5 text-primary" />
-                      Recent Alerts
+                      <Bell className="w-5 h-5 text-coral" />
+                      Emergency Alerts
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {alerts.length === 0 ? (
-                      <p className="text-sm text-muted-foreground py-4 text-center">No alerts from assigned patients</p>
+                      <p className="text-sm text-muted-foreground py-4 text-center">No alerts</p>
                     ) : (
-                      alerts.slice(0, 8).map((alert) => (
+                      alerts.map((alert) => (
                         <div
                           key={alert.id}
                           className={`flex items-start gap-3 p-4 rounded-xl border-l-4 ${
-                            alert.is_resolved
-                              ? "border-l-sage bg-sage-light/50 opacity-60"
-                              : alert.severity === "critical"
-                              ? "border-l-destructive bg-coral-light"
+                            alert.is_resolved ? "border-l-sage bg-sage-light/50 opacity-60"
+                              : alert.severity === "critical" ? "border-l-destructive bg-coral-light"
                               : "border-l-amber bg-amber-light"
                           }`}
                         >
-                          {alert.alert_type === "sos" ? (
-                            <AlertTriangle className="w-5 h-5 mt-0.5 shrink-0 text-destructive" />
-                          ) : (
-                            <MapPin className="w-5 h-5 mt-0.5 shrink-0" />
-                          )}
+                          <AlertTriangle className="w-5 h-5 mt-0.5 shrink-0" />
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
                               <Badge variant="secondary" className="text-xs">{patientName(alert.patient_id)}</Badge>
@@ -221,90 +307,37 @@ const CaregiverDashboard = () => {
                               <CheckCircle2 className="w-4 h-4 mr-1" /> Resolve
                             </Button>
                           )}
-                          {alert.is_resolved && (
-                            <Badge className="bg-sage/10 text-sage text-xs">Resolved</Badge>
-                          )}
+                          {alert.is_resolved && <Badge className="bg-sage/10 text-sage text-xs">Resolved</Badge>}
                         </div>
                       ))
                     )}
                   </CardContent>
                 </Card>
-              </motion.div>
-
-              {/* Patient List */}
-              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-                <Card className="shadow-card">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-title">
-                      <Heart className="w-5 h-5 text-coral" />
-                      My Patients
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {patients.map((p) => {
-                      const v = vitals[p.patient_id];
-                      const score = cogScores[p.patient_id];
-                      return (
-                        <div key={p.patient_id} className="p-3 rounded-xl bg-muted/50 space-y-2">
-                          <div className="flex items-center justify-between">
-                            <p className="font-medium text-foreground">{p.profile?.full_name || "Unknown"}</p>
-                            {score != null && (
-                              <Badge variant="secondary" className="text-xs">
-                                <Brain className="w-3 h-3 mr-1" />{Math.round(score)}%
-                              </Badge>
-                            )}
-                          </div>
-                          {v ? (
-                            <div className="grid grid-cols-2 gap-1 text-xs text-muted-foreground">
-                              {v.pulse_rate && <span>❤️ {v.pulse_rate} bpm</span>}
-                              {v.blood_pressure_systolic && <span>🩸 {v.blood_pressure_systolic}/{v.blood_pressure_diastolic}</span>}
-                              {v.temperature && <span>🌡️ {Number(v.temperature).toFixed(1)}°C</span>}
-                              {v.oxygen_saturation && <span>💨 {Number(v.oxygen_saturation)}% O₂</span>}
-                            </div>
-                          ) : (
-                            <p className="text-xs text-muted-foreground">No vitals recorded</p>
-                          )}
-                          <div className="flex gap-2">
-                            <Button size="sm" variant="ghost" className="text-xs h-7 px-2" onClick={() => navigate("/vitals")}>
-                              <Eye className="w-3 h-3 mr-1" /> Vitals
-                            </Button>
-                            <Button size="sm" variant="ghost" className="text-xs h-7 px-2" onClick={() => navigate("/safety")}>
-                              <MapPin className="w-3 h-3 mr-1" /> Location
-                            </Button>
-                            <Button size="sm" variant="ghost" className="text-xs h-7 px-2" onClick={() => navigate("/documents")}>
-                              <FileText className="w-3 h-3 mr-1" /> Docs
-                            </Button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </div>
+              </TabsContent>
+            </Tabs>
 
             {/* Quick Actions */}
-            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
               <Card className="shadow-card">
-                <CardHeader>
-                  <CardTitle className="text-title">Quick Actions</CardTitle>
-                </CardHeader>
-                <CardContent className="grid sm:grid-cols-4 gap-3">
-                  {[
-                    { label: "View Vitals", icon: Activity, path: "/vitals", color: "bg-calm-light text-calm" },
-                    { label: "AI Chat", icon: MessageCircle, path: "/chat", color: "bg-sage-light text-sage" },
-                    { label: "Documents", icon: FileText, path: "/documents", color: "bg-amber-light text-amber" },
-                    { label: "Notifications", icon: Bell, path: "/notifications", color: "bg-lavender-light text-lavender" },
-                  ].map((action) => (
-                    <button
-                      key={action.label}
-                      onClick={() => navigate(action.path)}
-                      className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:opacity-80 transition-opacity cursor-pointer`}
-                    >
-                      <action.icon className="w-7 h-7" />
-                      <span className="text-sm font-medium">{action.label}</span>
-                    </button>
-                  ))}
+                <CardContent className="p-5">
+                  <h3 className="font-serif text-title text-foreground mb-4">Quick Actions</h3>
+                  <div className="grid sm:grid-cols-4 gap-3">
+                    {[
+                      { label: "View Vitals", icon: Activity, path: "/vitals", color: "bg-calm-light text-calm" },
+                      { label: "AI Chat", icon: MessageCircle, path: "/chat", color: "bg-sage-light text-sage" },
+                      { label: "Documents", icon: FileText, path: "/documents", color: "bg-amber-light text-amber" },
+                      { label: "Notifications", icon: Bell, path: "/notifications", color: "bg-lavender-light text-lavender" },
+                    ].map((action) => (
+                      <button
+                        key={action.label}
+                        onClick={() => navigate(action.path)}
+                        className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:opacity-80 transition-opacity cursor-pointer`}
+                      >
+                        <action.icon className="w-7 h-7" />
+                        <span className="text-sm font-medium">{action.label}</span>
+                      </button>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>

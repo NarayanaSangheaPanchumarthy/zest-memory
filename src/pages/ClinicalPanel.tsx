@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import AppHeader from "@/components/AppHeader";
 import {
   Brain, TrendingDown, AlertTriangle, Activity, Loader2,
-  CheckCircle2, BarChart3
+  CheckCircle2, BarChart3, Sparkles
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import PatientManagement from "@/components/clinical/PatientManagement";
+import ClinicalAIPanel from "@/components/clinical/ClinicalAIPanel";
 
 interface PatientData {
   patient_id: string;
@@ -59,10 +60,7 @@ const ClinicalPanel = () => {
     setAllProfiles(profilesRes.data || []);
     setAllRoles(rolesRes.data || []);
 
-    if (patientIds.length === 0) {
-      setLoading(false);
-      return;
-    }
+    if (patientIds.length === 0) { setLoading(false); return; }
 
     const [vitalsRes, alertsRes, gamesRes] = await Promise.all([
       supabase.from("patient_vitals").select("*").in("patient_id", patientIds).order("recorded_at", { ascending: false }).limit(100),
@@ -76,9 +74,7 @@ const ClinicalPanel = () => {
     (profilesRes.data || []).forEach((p) => { profileMap[p.user_id] = { name: p.full_name, phone: p.phone }; });
 
     const latestVitalsMap: Record<string, any> = {};
-    (vitalsRes.data || []).forEach((v) => {
-      if (!latestVitalsMap[v.patient_id]) latestVitalsMap[v.patient_id] = v;
-    });
+    (vitalsRes.data || []).forEach((v) => { if (!latestVitalsMap[v.patient_id]) latestVitalsMap[v.patient_id] = v; });
 
     const gamesByPatient: Record<string, { date: string; accuracy: number }[]> = {};
     (gamesRes.data || []).forEach((g) => {
@@ -143,7 +139,7 @@ const ClinicalPanel = () => {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <h1 className="text-heading text-foreground">Clinical Insights</h1>
           <p className="text-accessible text-muted-foreground">
-            Patient management, analytics & risk assessment
+            Patient management, AI analytics & risk assessment
           </p>
         </motion.div>
 
@@ -166,6 +162,13 @@ const ClinicalPanel = () => {
             </motion.div>
           ))}
         </div>
+
+        {/* AI Clinical Analysis */}
+        {patients.length > 0 && (
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+            <ClinicalAIPanel patients={patients.map(p => ({ patient_id: p.patient_id, full_name: p.full_name }))} />
+          </motion.div>
+        )}
 
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Cognitive Trend Chart */}
