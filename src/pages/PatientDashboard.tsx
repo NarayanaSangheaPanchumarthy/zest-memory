@@ -93,11 +93,11 @@ const PatientDashboard = () => {
         {/* Main Tabs */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="w-full justify-start overflow-x-auto">
-              <TabsTrigger value="tasks">Daily Tasks</TabsTrigger>
-              <TabsTrigger value="medications">Medications</TabsTrigger>
-              <TabsTrigger value="mood">Mood Diary</TabsTrigger>
-              <TabsTrigger value="appointments">Appointments</TabsTrigger>
+            <TabsList className="w-full justify-start overflow-x-auto flex-nowrap">
+              <TabsTrigger value="tasks" className="text-xs sm:text-sm">Daily Tasks</TabsTrigger>
+              <TabsTrigger value="medications" className="text-xs sm:text-sm">Meds</TabsTrigger>
+              <TabsTrigger value="mood" className="text-xs sm:text-sm">Mood</TabsTrigger>
+              <TabsTrigger value="appointments" className="text-xs sm:text-sm">Appts</TabsTrigger>
             </TabsList>
 
             <TabsContent value="tasks" className="mt-4">
