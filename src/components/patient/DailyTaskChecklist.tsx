@@ -77,21 +77,19 @@ const DailyTaskChecklist = ({ userId }: { userId: string }) => {
   return (
     <Card className="shadow-card">
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <CardTitle className="flex items-center gap-2 text-title">
             <Calendar className="w-5 h-5 text-primary" />
             Today's Routine
           </CardTitle>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm" variant="outline" className="gap-1">
-                <Plus className="w-4 h-4" /> Add
-              </Button>
-            </DialogTrigger>
-            {/* ... keep existing dialog content */}
-          </Dialog>
-          <DailyRoutineTemplates userId={userId} onTasksAdded={loadTasks} />
-            </DialogTrigger>
+          <div className="flex items-center gap-2">
+            <DailyRoutineTemplates userId={userId} onTasksAdded={loadTasks} />
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" variant="outline" className="gap-1">
+                  <Plus className="w-4 h-4" /> Add
+                </Button>
+              </DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>Add Daily Task</DialogTitle></DialogHeader>
               <div className="space-y-4 pt-2">
