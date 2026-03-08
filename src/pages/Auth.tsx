@@ -47,7 +47,7 @@ const Auth = () => {
   };
 
   const handleRegister = async () => {
-    const result = registerSchema.safeParse({ email, password, fullName, role: selectedRole });
+    const result = registerSchema.safeParse({ email, password, fullName });
     if (!result.success) {
       toast.error(result.error.errors[0].message);
       return;
@@ -67,8 +67,8 @@ const Auth = () => {
       return;
     }
     if (data.user) {
-      // Insert role
-      await supabase.from("user_roles").insert({ user_id: data.user.id, role: selectedRole });
+      // Always assign patient role — privileged roles are assigned by clinicians
+      await supabase.from("user_roles").insert({ user_id: data.user.id, role: "patient" as const });
     }
     setLoading(false);
     toast.success("Account created! Please check your email to verify your account.");
