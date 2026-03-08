@@ -13,6 +13,15 @@ import AppHeader from "@/components/AppHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { z } from "zod";
+
+const vitalsSchema = z.object({
+  temperature: z.number().min(30, "Temp must be ≥30°C").max(45, "Temp must be ≤45°C").nullable(),
+  blood_pressure_systolic: z.number().min(50, "Systolic BP must be ≥50").max(300, "Systolic BP must be ≤300").nullable(),
+  blood_pressure_diastolic: z.number().min(30, "Diastolic BP must be ≥30").max(200, "Diastolic BP must be ≤200").nullable(),
+  pulse_rate: z.number().min(20, "Pulse must be ≥20").max(300, "Pulse must be ≤300").nullable(),
+  oxygen_saturation: z.number().min(50, "O₂ must be ≥50%").max(100, "O₂ must be ≤100%").nullable(),
+});
 
 type Vital = {
   id: string;
@@ -67,16 +76,24 @@ const VitalsMonitor = () => {
 
   const submitVitals = async () => {
     if (!user) return;
-    setLoading(true);
-    const vital = {
-      patient_id: user.id,
+
+    const parsed = {
       temperature: temp ? parseFloat(temp) : null,
       blood_pressure_systolic: bpSys ? parseInt(bpSys) : null,
       blood_pressure_diastolic: bpDia ? parseInt(bpDia) : null,
       pulse_rate: pulse ? parseInt(pulse) : null,
       oxygen_saturation: o2 ? parseFloat(o2) : null,
-      source: deviceType,
     };
+
+    const validation = vitalsSchema.safeParse(parsed);
+    if (!validation.success) {
+      toast.error(validation.error.errors[0].message);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    const vital = { patient_id: user.id, ...parsed, source: deviceType };
 
     const { error } = await supabase.from("patient_vitals").insert(vital);
     if (error) {
@@ -128,23 +145,23 @@ const VitalsMonitor = () => {
               <CardContent className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label className="flex items-center gap-1"><Thermometer className="w-4 h-4 text-coral" /> Temperature (°C)</Label>
-                  <Input type="number" step="0.1" value={temp} onChange={(e) => setTemp(e.target.value)} placeholder="36.5" />
+                  <Input type="number" step="0.1" min={30} max={45} value={temp} onChange={(e) => setTemp(e.target.value)} placeholder="36.5" />
                 </div>
                 <div className="space-y-2">
                   <Label className="flex items-center gap-1"><Activity className="w-4 h-4 text-primary" /> BP Systolic (mmHg)</Label>
-                  <Input type="number" value={bpSys} onChange={(e) => setBpSys(e.target.value)} placeholder="120" />
+                  <Input type="number" min={50} max={300} value={bpSys} onChange={(e) => setBpSys(e.target.value)} placeholder="120" />
                 </div>
                 <div className="space-y-2">
                   <Label className="flex items-center gap-1"><Activity className="w-4 h-4 text-primary" /> BP Diastolic (mmHg)</Label>
-                  <Input type="number" value={bpDia} onChange={(e) => setBpDia(e.target.value)} placeholder="80" />
+                  <Input type="number" min={30} max={200} value={bpDia} onChange={(e) => setBpDia(e.target.value)} placeholder="80" />
                 </div>
                 <div className="space-y-2">
                   <Label className="flex items-center gap-1"><Heart className="w-4 h-4 text-coral" /> Pulse Rate (bpm)</Label>
-                  <Input type="number" value={pulse} onChange={(e) => setPulse(e.target.value)} placeholder="72" />
+                  <Input type="number" min={20} max={300} value={pulse} onChange={(e) => setPulse(e.target.value)} placeholder="72" />
                 </div>
                 <div className="space-y-2">
                   <Label className="flex items-center gap-1"><Droplets className="w-4 h-4 text-calm" /> O₂ Saturation (%)</Label>
-                  <Input type="number" step="0.1" value={o2} onChange={(e) => setO2(e.target.value)} placeholder="98" />
+                  <Input type="number" step="0.1" min={50} max={100} value={o2} onChange={(e) => setO2(e.target.value)} placeholder="98" />
                 </div>
                 <div className="flex items-end">
                   <Button onClick={submitVitals} disabled={loading} className="w-full" variant="hero">
