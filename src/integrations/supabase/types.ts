@@ -14,6 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          appointment_date: string
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          location: string | null
+          patient_id: string
+          provider_name: string | null
+          status: string
+          title: string
+        }
+        Insert: {
+          appointment_date: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          patient_id: string
+          provider_name?: string | null
+          status?: string
+          title: string
+        }
+        Update: {
+          appointment_date?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          patient_id?: string
+          provider_name?: string | null
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      care_tasks: {
+        Row: {
+          assigned_to: string
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          due_date: string | null
+          id: string
+          patient_id: string
+          priority: string
+          status: string
+          title: string
+        }
+        Insert: {
+          assigned_to: string
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          patient_id: string
+          priority?: string
+          status?: string
+          title: string
+        }
+        Update: {
+          assigned_to?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          patient_id?: string
+          priority?: string
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           content: string
@@ -35,6 +116,72 @@ export type Database = {
           id?: string
           role?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      communication_logs: {
+        Row: {
+          author_id: string
+          created_at: string
+          id: string
+          log_type: string
+          message: string
+          patient_id: string
+        }
+        Insert: {
+          author_id: string
+          created_at?: string
+          id?: string
+          log_type?: string
+          message: string
+          patient_id: string
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          id?: string
+          log_type?: string
+          message?: string
+          patient_id?: string
+        }
+        Relationships: []
+      }
+      daily_tasks: {
+        Row: {
+          category: string
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_completed: boolean
+          patient_id: string
+          scheduled_time: string | null
+          task_date: string
+          title: string
+        }
+        Insert: {
+          category?: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_completed?: boolean
+          patient_id: string
+          scheduled_time?: string | null
+          task_date?: string
+          title: string
+        }
+        Update: {
+          category?: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_completed?: boolean
+          patient_id?: string
+          scheduled_time?: string | null
+          task_date?: string
+          title?: string
         }
         Relationships: []
       }
@@ -173,6 +320,78 @@ export type Database = {
           subject?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      medications: {
+        Row: {
+          created_at: string
+          dosage: string | null
+          frequency: string
+          id: string
+          is_active: boolean
+          name: string
+          notes: string | null
+          patient_id: string
+          time_of_day: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dosage?: string | null
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          patient_id: string
+          time_of_day?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dosage?: string | null
+          frequency?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          patient_id?: string
+          time_of_day?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      mood_entries: {
+        Row: {
+          created_at: string
+          energy_level: number | null
+          entry_date: string
+          id: string
+          mood: string
+          notes: string | null
+          patient_id: string
+          symptoms: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          energy_level?: number | null
+          entry_date?: string
+          id?: string
+          mood: string
+          notes?: string | null
+          patient_id: string
+          symptoms?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          energy_level?: number | null
+          entry_date?: string
+          id?: string
+          mood?: string
+          notes?: string | null
+          patient_id?: string
+          symptoms?: string[] | null
         }
         Relationships: []
       }
