@@ -145,23 +145,23 @@ const VitalsMonitor = () => {
               <CardContent className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label className="flex items-center gap-1"><Thermometer className="w-4 h-4 text-coral" /> Temperature (°C)</Label>
-                  <Input type="number" step="0.1" value={temp} onChange={(e) => setTemp(e.target.value)} placeholder="36.5" />
+                  <Input type="number" step="0.1" min={30} max={45} value={temp} onChange={(e) => setTemp(e.target.value)} placeholder="36.5" />
                 </div>
                 <div className="space-y-2">
                   <Label className="flex items-center gap-1"><Activity className="w-4 h-4 text-primary" /> BP Systolic (mmHg)</Label>
-                  <Input type="number" value={bpSys} onChange={(e) => setBpSys(e.target.value)} placeholder="120" />
+                  <Input type="number" min={50} max={300} value={bpSys} onChange={(e) => setBpSys(e.target.value)} placeholder="120" />
                 </div>
                 <div className="space-y-2">
                   <Label className="flex items-center gap-1"><Activity className="w-4 h-4 text-primary" /> BP Diastolic (mmHg)</Label>
-                  <Input type="number" value={bpDia} onChange={(e) => setBpDia(e.target.value)} placeholder="80" />
+                  <Input type="number" min={30} max={200} value={bpDia} onChange={(e) => setBpDia(e.target.value)} placeholder="80" />
                 </div>
                 <div className="space-y-2">
                   <Label className="flex items-center gap-1"><Heart className="w-4 h-4 text-coral" /> Pulse Rate (bpm)</Label>
-                  <Input type="number" value={pulse} onChange={(e) => setPulse(e.target.value)} placeholder="72" />
+                  <Input type="number" min={20} max={300} value={pulse} onChange={(e) => setPulse(e.target.value)} placeholder="72" />
                 </div>
                 <div className="space-y-2">
                   <Label className="flex items-center gap-1"><Droplets className="w-4 h-4 text-calm" /> O₂ Saturation (%)</Label>
-                  <Input type="number" step="0.1" value={o2} onChange={(e) => setO2(e.target.value)} placeholder="98" />
+                  <Input type="number" step="0.1" min={50} max={100} value={o2} onChange={(e) => setO2(e.target.value)} placeholder="98" />
                 </div>
                 <div className="flex items-end">
                   <Button onClick={submitVitals} disabled={loading} className="w-full" variant="hero">
