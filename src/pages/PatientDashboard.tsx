@@ -65,9 +65,9 @@ const PatientDashboard = () => {
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8">
         {/* Greeting */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-1">
-          <h1 className="text-heading text-foreground">Good morning, Margaret</h1>
+          <h1 className="text-heading text-foreground">Good morning, {profile?.full_name || "there"}</h1>
           <p className="text-accessible text-muted-foreground">
-            Today is Monday, March 1, 2026. Here's your day.
+            Today is {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}. Here's your day.
           </p>
         </motion.div>
 
