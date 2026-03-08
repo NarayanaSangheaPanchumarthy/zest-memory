@@ -92,9 +92,9 @@ const AppHeader = () => {
             <Settings className="w-5 h-5" />
           </Button>
           {role === "patient" && (
-            <Button variant="emergency" size="sm" className="gap-2 hidden sm:flex" onClick={() => navigate("/safety")}>
+            <Button variant="emergency" size="sm" className="gap-2" onClick={() => navigate("/safety")}>
               <Phone className="w-4 h-4" />
-              <span>SOS</span>
+              <span className="hidden sm:inline">SOS</span>
             </Button>
           )}
           {user && (

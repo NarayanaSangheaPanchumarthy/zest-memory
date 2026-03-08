@@ -227,19 +227,19 @@ const ClinicalPanel = () => {
                     return (
                       <div
                         key={alert.id}
-                        className={`flex items-start gap-2 p-3 rounded-lg text-sm ${
+                        className={`flex flex-col sm:flex-row items-start gap-2 p-3 rounded-lg text-sm ${
                           alert.is_resolved ? "bg-muted/30 opacity-60" : alert.severity === "critical" ? "bg-[hsl(var(--coral-light))]" : "bg-[hsl(var(--warm-amber-light))]"
                         }`}
                       >
-                        <div className="flex-1">
-                          <div className="flex items-center gap-1 mb-1">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-1 mb-1">
                             <Badge variant="secondary" className="text-xs">{pName}</Badge>
                             <Badge variant="secondary" className="text-xs capitalize">{alert.alert_type}</Badge>
                           </div>
                           <p className="text-xs text-muted-foreground">{new Date(alert.created_at).toLocaleString()}</p>
                         </div>
                         {!alert.is_resolved ? (
-                          <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => resolveAlert(alert.id)}>
+                          <Button size="sm" variant="ghost" className="h-7 text-xs shrink-0" onClick={() => resolveAlert(alert.id)}>
                             <CheckCircle2 className="w-3 h-3 mr-1" /> Resolve
                           </Button>
                         ) : (
