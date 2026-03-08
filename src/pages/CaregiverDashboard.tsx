@@ -8,8 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
+// DEMO DATA — replace before production
 const alerts = [
-  { message: "Margaret missed her 3 PM medication", time: "15 min ago", type: "warning" as const, icon: Pill },
+  { message: "Patient missed their 3 PM medication", time: "15 min ago", type: "warning" as const, icon: Pill },
   { message: "Mood detected as anxious from conversation", time: "1 hr ago", type: "info" as const, icon: Activity },
   { message: "Wandering alert: left safe zone briefly", time: "2 hrs ago", type: "critical" as const, icon: MapPin },
   { message: "Morning medication taken on time", time: "6 hrs ago", type: "success" as const, icon: CheckCircle2 },
@@ -36,7 +37,7 @@ const CaregiverDashboard = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <h1 className="text-heading text-foreground">Caregiver Dashboard</h1>
-          <p className="text-accessible text-muted-foreground">Monitoring Margaret's care</p>
+          <p className="text-accessible text-muted-foreground">Monitoring patient care</p>
         </motion.div>
 
         {/* Stats */}
