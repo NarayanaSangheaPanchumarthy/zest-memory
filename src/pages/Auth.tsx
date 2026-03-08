@@ -17,16 +17,7 @@ const loginSchema = z.object({
 
 const registerSchema = loginSchema.extend({
   fullName: z.string().trim().min(1, "Full name is required").max(100),
-  role: z.enum(["patient", "caregiver", "clinician"] as const),
 });
-
-type RoleOption = { value: "patient" | "caregiver" | "clinician"; label: string; desc: string };
-
-const roles: RoleOption[] = [
-  { value: "patient", label: "Patient", desc: "Access cognitive tools & daily routines" },
-  { value: "caregiver", label: "Caregiver", desc: "Monitor & support your loved one" },
-  { value: "clinician", label: "Clinician", desc: "Clinical analytics & patient management" },
-];
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
