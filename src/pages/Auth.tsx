@@ -141,32 +141,8 @@ const Auth = () => {
               </div>
             </div>
 
-            {!isLogin && (
-              <div className="space-y-2">
-                <Label>Select Your Role</Label>
-                <div className="grid gap-2">
-                  {roles.map((r) => (
-                    <button
-                      key={r.value}
-                      onClick={() => setSelectedRole(r.value)}
-                      className={`flex items-start gap-3 p-3 rounded-xl border transition-colors text-left cursor-pointer ${
-                        selectedRole === r.value
-                          ? "border-primary bg-calm-light"
-                          : "border-border hover:bg-muted/50"
-                      }`}
-                    >
-                      <div className={`w-4 h-4 rounded-full border-2 mt-0.5 ${
-                        selectedRole === r.value ? "border-primary bg-primary" : "border-muted-foreground"
-                      }`} />
-                      <div>
-                        <p className="font-medium text-foreground">{r.label}</p>
-                        <p className="text-xs text-muted-foreground">{r.desc}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+
+
 
             <Button
               onClick={isLogin ? handleLogin : handleRegister}
