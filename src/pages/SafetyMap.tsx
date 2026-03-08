@@ -139,16 +139,16 @@ const SafetyMap = () => {
         message: `⚠️ Wandering detected! Patient is outside safe zones. Location: ${lat.toFixed(5)}, ${lng.toFixed(5)}`,
       });
 
-      // Notify all caregivers
-      const { data: caregivers } = await supabase
-        .from("user_roles")
-        .select("user_id")
-        .eq("role", "caregiver");
+      // Notify assigned caregivers/clinicians
+      const { data: assignments } = await supabase
+        .from("patient_assignments")
+        .select("assigned_user_id")
+        .eq("patient_id", user.id);
 
-      if (caregivers && caregivers.length > 0) {
+      if (assignments && assignments.length > 0) {
         await supabase.from("notifications").insert(
-          caregivers.map((c) => ({
-            user_id: c.user_id,
+          assignments.map((a) => ({
+            user_id: a.assigned_user_id,
             title: "⚠️ Wandering Alert",
             message: `Patient has left safe zone! Location: ${lat.toFixed(5)}, ${lng.toFixed(5)}`,
             type: "warning",

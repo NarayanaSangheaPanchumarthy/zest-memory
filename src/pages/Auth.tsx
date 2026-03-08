@@ -17,23 +17,13 @@ const loginSchema = z.object({
 
 const registerSchema = loginSchema.extend({
   fullName: z.string().trim().min(1, "Full name is required").max(100),
-  role: z.enum(["patient", "caregiver", "clinician"] as const),
 });
-
-type RoleOption = { value: "patient" | "caregiver" | "clinician"; label: string; desc: string };
-
-const roles: RoleOption[] = [
-  { value: "patient", label: "Patient", desc: "Access cognitive tools & daily routines" },
-  { value: "caregiver", label: "Caregiver", desc: "Monitor & support your loved one" },
-  { value: "clinician", label: "Clinician", desc: "Clinical analytics & patient management" },
-];
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
-  const [selectedRole, setSelectedRole] = useState<"patient" | "caregiver" | "clinician">("patient");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -56,7 +46,7 @@ const Auth = () => {
   };
 
   const handleRegister = async () => {
-    const result = registerSchema.safeParse({ email, password, fullName, role: selectedRole });
+    const result = registerSchema.safeParse({ email, password, fullName });
     if (!result.success) {
       toast.error(result.error.errors[0].message);
       return;
@@ -76,8 +66,8 @@ const Auth = () => {
       return;
     }
     if (data.user) {
-      // Insert role
-      await supabase.from("user_roles").insert({ user_id: data.user.id, role: selectedRole });
+      // Always assign patient role — privileged roles are assigned by clinicians
+      await supabase.from("user_roles").insert({ user_id: data.user.id, role: "patient" as const });
     }
     setLoading(false);
     toast.success("Account created! Please check your email to verify your account.");
@@ -150,32 +140,8 @@ const Auth = () => {
               </div>
             </div>
 
-            {!isLogin && (
-              <div className="space-y-2">
-                <Label>Select Your Role</Label>
-                <div className="grid gap-2">
-                  {roles.map((r) => (
-                    <button
-                      key={r.value}
-                      onClick={() => setSelectedRole(r.value)}
-                      className={`flex items-start gap-3 p-3 rounded-xl border transition-colors text-left cursor-pointer ${
-                        selectedRole === r.value
-                          ? "border-primary bg-calm-light"
-                          : "border-border hover:bg-muted/50"
-                      }`}
-                    >
-                      <div className={`w-4 h-4 rounded-full border-2 mt-0.5 ${
-                        selectedRole === r.value ? "border-primary bg-primary" : "border-muted-foreground"
-                      }`} />
-                      <div>
-                        <p className="font-medium text-foreground">{r.label}</p>
-                        <p className="text-xs text-muted-foreground">{r.desc}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+
+
 
             <Button
               onClick={isLogin ? handleLogin : handleRegister}

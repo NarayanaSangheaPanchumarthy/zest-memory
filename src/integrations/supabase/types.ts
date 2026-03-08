@@ -209,6 +209,27 @@ export type Database = {
         }
         Relationships: []
       }
+      patient_assignments: {
+        Row: {
+          assigned_user_id: string
+          created_at: string
+          id: string
+          patient_id: string
+        }
+        Insert: {
+          assigned_user_id: string
+          created_at?: string
+          id?: string
+          patient_id: string
+        }
+        Update: {
+          assigned_user_id?: string
+          created_at?: string
+          id?: string
+          patient_id?: string
+        }
+        Relationships: []
+      }
       patient_documents: {
         Row: {
           created_at: string
@@ -402,6 +423,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_assigned_to: {
+        Args: { _patient_id: string; _user_id: string }
         Returns: boolean
       }
     }
