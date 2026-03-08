@@ -466,7 +466,7 @@ const Index = () => {
       </section>
 
       {/* WHO — Detailed role cards */}
-      <section className="py-20 px-6">
+      <section id="who" className="py-20 px-6">
         <div className="max-w-6xl mx-auto">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-14">
             <motion.p variants={fadeUp} custom={0} className="text-primary font-medium text-sm uppercase tracking-wider mb-2">Who It's For</motion.p>
