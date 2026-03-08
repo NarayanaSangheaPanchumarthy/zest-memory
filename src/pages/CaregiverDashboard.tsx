@@ -268,27 +268,29 @@ const CaregiverDashboard = () => {
                       alerts.map((alert) => (
                         <div
                           key={alert.id}
-                          className={`flex items-start gap-3 p-4 rounded-xl border-l-4 ${
+                          className={`flex flex-col sm:flex-row items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-xl border-l-4 ${
                             alert.is_resolved ? "border-l-[hsl(var(--sage))] bg-[hsl(var(--sage-light))]/50 opacity-60"
                               : alert.severity === "critical" ? "border-l-destructive bg-[hsl(var(--coral-light))]"
                               : "border-l-[hsl(var(--warm-amber))] bg-[hsl(var(--warm-amber-light))]"
                           }`}
                         >
-                          <AlertTriangle className="w-5 h-5 mt-0.5 shrink-0" />
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <Badge variant="secondary" className="text-xs">{patientName(alert.patient_id)}</Badge>
-                              <Badge variant="secondary" className="text-xs capitalize">{alert.alert_type}</Badge>
+                          <div className="flex items-start gap-2 flex-1 min-w-0">
+                            <AlertTriangle className="w-5 h-5 mt-0.5 shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                                <Badge variant="secondary" className="text-xs">{patientName(alert.patient_id)}</Badge>
+                                <Badge variant="secondary" className="text-xs capitalize">{alert.alert_type}</Badge>
+                              </div>
+                              <p className="text-sm text-foreground break-words">{alert.message}</p>
+                              <p className="text-xs text-muted-foreground mt-1">{new Date(alert.created_at).toLocaleString()}</p>
                             </div>
-                            <p className="text-sm text-foreground">{alert.message}</p>
-                            <p className="text-xs text-muted-foreground mt-1">{new Date(alert.created_at).toLocaleString()}</p>
                           </div>
                           {!alert.is_resolved ? (
-                            <Button size="sm" variant="outline" onClick={() => resolveAlert(alert.id)}>
+                            <Button size="sm" variant="outline" className="shrink-0 self-start" onClick={() => resolveAlert(alert.id)}>
                               <CheckCircle2 className="w-4 h-4 mr-1" /> Resolve
                             </Button>
                           ) : (
-                            <Badge className="bg-[hsl(var(--sage))]/10 text-[hsl(var(--sage))] text-xs">Resolved</Badge>
+                            <Badge className="bg-[hsl(var(--sage))]/10 text-[hsl(var(--sage))] text-xs shrink-0">Resolved</Badge>
                           )}
                         </div>
                       ))
