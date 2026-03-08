@@ -16,6 +16,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import PatientManagement from "@/components/clinical/PatientManagement";
 import ClinicalAIPanel from "@/components/clinical/ClinicalAIPanel";
+import PatientRoutineManager from "@/components/clinical/PatientRoutineManager";
 
 interface PatientData {
   patient_id: string;
