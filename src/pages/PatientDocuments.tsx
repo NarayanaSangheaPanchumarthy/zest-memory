@@ -25,8 +25,9 @@ const PatientDocuments = () => {
 
   const fetchDocs = async () => {
     if (!user) return;
-    const { data } = await supabase.from("patient_documents").select("*").eq("patient_id", user.id).order("created_at", { ascending: false });
-    if (data) setDocs(data);
+    const { data } = await supabase.from("patient_documents").select("id, title, description, file_url, file_type, created_at").eq("patient_id", user.id).order("created_at", { ascending: false });
+    // file_url stores the storage path, not a public URL
+    if (data) setDocs(data.map(d => ({ ...d, file_path: d.file_url })));
   };
 
   useEffect(() => { fetchDocs(); }, [user]);
