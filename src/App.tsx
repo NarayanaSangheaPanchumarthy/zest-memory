@@ -18,6 +18,7 @@ import HelpDesk from "./pages/HelpDesk";
 import PatientDocuments from "./pages/PatientDocuments";
 import SafetyMap from "./pages/SafetyMap";
 import MemoryGames from "./pages/MemoryGames";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
