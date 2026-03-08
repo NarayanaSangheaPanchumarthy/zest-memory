@@ -12,7 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-type Doc = { id: string; title: string; description: string | null; file_url: string | null; file_type: string | null; created_at: string };
+type Doc = { id: string; title: string; description: string | null; file_path: string | null; file_type: string | null; created_at: string };
 
 const PatientDocuments = () => {
   const { user } = useAuth();
