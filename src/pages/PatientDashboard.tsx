@@ -14,6 +14,7 @@ import MedicationReminders from "@/components/patient/MedicationReminders";
 import MoodDiary from "@/components/patient/MoodDiary";
 import AppointmentCalendar from "@/components/patient/AppointmentCalendar";
 import EmergencySOS from "@/components/EmergencySOS";
+import WellnessReminders from "@/components/patient/WellnessReminders";
 
 const PatientDashboard = () => {
   const { user, profile } = useAuth();
@@ -65,6 +66,9 @@ const PatientDashboard = () => {
             {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
           </p>
         </motion.div>
+
+        {/* Wellness Reminders */}
+        <WellnessReminders userId={user.id} />
 
         {/* AI Assistant Card */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>

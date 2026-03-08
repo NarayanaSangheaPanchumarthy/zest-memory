@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import DailyRoutineTemplates from "./DailyRoutineTemplates";
 
 interface DailyTask {
   id: string;
@@ -76,17 +77,19 @@ const DailyTaskChecklist = ({ userId }: { userId: string }) => {
   return (
     <Card className="shadow-card">
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <CardTitle className="flex items-center gap-2 text-title">
             <Calendar className="w-5 h-5 text-primary" />
             Today's Routine
           </CardTitle>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm" variant="outline" className="gap-1">
-                <Plus className="w-4 h-4" /> Add
-              </Button>
-            </DialogTrigger>
+          <div className="flex items-center gap-2">
+            <DailyRoutineTemplates userId={userId} onTasksAdded={loadTasks} />
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" variant="outline" className="gap-1">
+                  <Plus className="w-4 h-4" /> Add
+                </Button>
+              </DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>Add Daily Task</DialogTitle></DialogHeader>
               <div className="space-y-4 pt-2">
@@ -115,6 +118,7 @@ const DailyTaskChecklist = ({ userId }: { userId: string }) => {
               </div>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
         {tasks.length > 0 && (
           <div className="mt-2">
