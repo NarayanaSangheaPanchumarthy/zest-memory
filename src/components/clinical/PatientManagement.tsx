@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Users, Search, Eye, FileText, Trash2, UserPlus, Edit2,
   Activity, Brain, AlertTriangle, X, Save, Phone, MapPin,
-  ChevronDown, ChevronUp, Filter, List
+  ChevronDown, ChevronUp, Filter, List, Plus, Loader2, Mail, Copy
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -76,6 +76,12 @@ const PatientManagement = ({
   const [editName, setEditName] = useState("");
   const [editPhone, setEditPhone] = useState("");
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [addPatientOpen, setAddPatientOpen] = useState(false);
+  const [newPatientName, setNewPatientName] = useState("");
+  const [newPatientEmail, setNewPatientEmail] = useState("");
+  const [newPatientPhone, setNewPatientPhone] = useState("");
+  const [addingPatient, setAddingPatient] = useState(false);
+  const [tempPassword, setTempPassword] = useState<string | null>(null);
   const [selectedPatient, setSelectedPatient] = useState("");
   const [selectedCaregiver, setSelectedCaregiver] = useState("");
   const [activeTab, setActiveTab] = useState("registry");
@@ -165,6 +171,50 @@ const PatientManagement = ({
     onReload();
   };
 
+  const handleAddPatient = async () => {
+    if (!newPatientName.trim()) { toast.error("Name is required"); return; }
+    if (!newPatientEmail.trim() || !newPatientEmail.includes("@")) { toast.error("Valid email is required"); return; }
+    if (newPatientName.trim().length > 100) { toast.error("Name must be under 100 characters"); return; }
+
+    setAddingPatient(true);
+    setTempPassword(null);
+    try {
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token;
+      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-patient`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          full_name: newPatientName.trim(),
+          email: newPatientEmail.trim(),
+          phone: newPatientPhone.trim() || null,
+        }),
+      });
+      const result = await resp.json();
+      if (!resp.ok) {
+        toast.error(result.error || "Failed to create patient");
+      } else {
+        toast.success(`Patient "${newPatientName.trim()}" created!`);
+        setTempPassword(result.temp_password);
+        onReload();
+      }
+    } catch (e) {
+      toast.error("Failed to create patient");
+    }
+    setAddingPatient(false);
+  };
+
+  const resetAddPatientForm = () => {
+    setNewPatientName("");
+    setNewPatientEmail("");
+    setNewPatientPhone("");
+    setTempPassword(null);
+    setAddPatientOpen(false);
+  };
+
   const getPatientAssignments = (patientId: string) =>
     assignments.filter((a) => a.patient_id === patientId);
 
@@ -179,13 +229,89 @@ const PatientManagement = ({
             <Users className="w-5 h-5 text-primary" />
             Patient Management
           </CardTitle>
-          <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="default" size="sm" className="gap-2">
-                <UserPlus className="w-4 h-4" />
-                Assign Patient
-              </Button>
-            </DialogTrigger>
+          <div className="flex gap-2">
+            <Dialog open={addPatientOpen} onOpenChange={(open) => { if (!open) resetAddPatientForm(); else setAddPatientOpen(true); }}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Plus className="w-4 h-4" />
+                  Add Patient
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add New Patient</DialogTitle>
+                </DialogHeader>
+                {tempPassword ? (
+                  <div className="space-y-4 pt-2">
+                    <div className="rounded-xl bg-[hsl(var(--sage-light))] p-4 text-center space-y-2">
+                      <p className="text-sm font-medium text-foreground">Patient created successfully!</p>
+                      <p className="text-xs text-muted-foreground">Share these temporary credentials with the patient:</p>
+                      <div className="bg-card rounded-lg p-3 space-y-1 text-left">
+                        <p className="text-sm"><span className="text-muted-foreground">Email:</span> <span className="font-medium">{newPatientEmail}</span></p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm"><span className="text-muted-foreground">Password:</span> <span className="font-mono font-medium">{tempPassword}</span></p>
+                          <button onClick={() => { navigator.clipboard.writeText(tempPassword); toast.success("Copied!"); }} className="text-primary hover:text-primary/80">
+                            <Copy className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <Button onClick={resetAddPatientForm} className="w-full">Done</Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4 pt-2">
+                    <div className="space-y-2">
+                      <Label>Full Name *</Label>
+                      <Input
+                        value={newPatientName}
+                        onChange={(e) => setNewPatientName(e.target.value)}
+                        placeholder="Patient full name"
+                        maxLength={100}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Email *</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          value={newPatientEmail}
+                          onChange={(e) => setNewPatientEmail(e.target.value)}
+                          placeholder="patient@email.com"
+                          type="email"
+                          className="pl-10"
+                          maxLength={255}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Phone (optional)</Label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          value={newPatientPhone}
+                          onChange={(e) => setNewPatientPhone(e.target.value)}
+                          placeholder="+1 234 567 8900"
+                          className="pl-10"
+                          maxLength={20}
+                        />
+                      </div>
+                    </div>
+                    <Button onClick={handleAddPatient} disabled={addingPatient} className="w-full gap-2">
+                      {addingPatient ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                      {addingPatient ? "Creating..." : "Create Patient"}
+                    </Button>
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="default" size="sm" className="gap-2">
+                  <UserPlus className="w-4 h-4" />
+                  Assign Patient
+                </Button>
+              </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Assign Caregiver to Patient</DialogTitle>
@@ -221,6 +347,7 @@ const PatientManagement = ({
               </div>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         {/* Search & Filter Bar */}
