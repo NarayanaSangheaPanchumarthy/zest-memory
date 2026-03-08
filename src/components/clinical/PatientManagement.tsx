@@ -229,13 +229,89 @@ const PatientManagement = ({
             <Users className="w-5 h-5 text-primary" />
             Patient Management
           </CardTitle>
-          <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="default" size="sm" className="gap-2">
-                <UserPlus className="w-4 h-4" />
-                Assign Patient
-              </Button>
-            </DialogTrigger>
+          <div className="flex gap-2">
+            <Dialog open={addPatientOpen} onOpenChange={(open) => { if (!open) resetAddPatientForm(); else setAddPatientOpen(true); }}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Plus className="w-4 h-4" />
+                  Add Patient
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add New Patient</DialogTitle>
+                </DialogHeader>
+                {tempPassword ? (
+                  <div className="space-y-4 pt-2">
+                    <div className="rounded-xl bg-[hsl(var(--sage-light))] p-4 text-center space-y-2">
+                      <p className="text-sm font-medium text-foreground">Patient created successfully!</p>
+                      <p className="text-xs text-muted-foreground">Share these temporary credentials with the patient:</p>
+                      <div className="bg-card rounded-lg p-3 space-y-1 text-left">
+                        <p className="text-sm"><span className="text-muted-foreground">Email:</span> <span className="font-medium">{newPatientEmail}</span></p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm"><span className="text-muted-foreground">Password:</span> <span className="font-mono font-medium">{tempPassword}</span></p>
+                          <button onClick={() => { navigator.clipboard.writeText(tempPassword); toast.success("Copied!"); }} className="text-primary hover:text-primary/80">
+                            <Copy className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <Button onClick={resetAddPatientForm} className="w-full">Done</Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4 pt-2">
+                    <div className="space-y-2">
+                      <Label>Full Name *</Label>
+                      <Input
+                        value={newPatientName}
+                        onChange={(e) => setNewPatientName(e.target.value)}
+                        placeholder="Patient full name"
+                        maxLength={100}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Email *</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          value={newPatientEmail}
+                          onChange={(e) => setNewPatientEmail(e.target.value)}
+                          placeholder="patient@email.com"
+                          type="email"
+                          className="pl-10"
+                          maxLength={255}
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Phone (optional)</Label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          value={newPatientPhone}
+                          onChange={(e) => setNewPatientPhone(e.target.value)}
+                          placeholder="+1 234 567 8900"
+                          className="pl-10"
+                          maxLength={20}
+                        />
+                      </div>
+                    </div>
+                    <Button onClick={handleAddPatient} disabled={addingPatient} className="w-full gap-2">
+                      {addingPatient ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                      {addingPatient ? "Creating..." : "Create Patient"}
+                    </Button>
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="default" size="sm" className="gap-2">
+                  <UserPlus className="w-4 h-4" />
+                  Assign Patient
+                </Button>
+              </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Assign Caregiver to Patient</DialogTitle>
