@@ -76,16 +76,24 @@ const VitalsMonitor = () => {
 
   const submitVitals = async () => {
     if (!user) return;
-    setLoading(true);
-    const vital = {
-      patient_id: user.id,
+
+    const parsed = {
       temperature: temp ? parseFloat(temp) : null,
       blood_pressure_systolic: bpSys ? parseInt(bpSys) : null,
       blood_pressure_diastolic: bpDia ? parseInt(bpDia) : null,
       pulse_rate: pulse ? parseInt(pulse) : null,
       oxygen_saturation: o2 ? parseFloat(o2) : null,
-      source: deviceType,
     };
+
+    const validation = vitalsSchema.safeParse(parsed);
+    if (!validation.success) {
+      toast.error(validation.error.errors[0].message);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    const vital = { patient_id: user.id, ...parsed, source: deviceType };
 
     const { error } = await supabase.from("patient_vitals").insert(vital);
     if (error) {
