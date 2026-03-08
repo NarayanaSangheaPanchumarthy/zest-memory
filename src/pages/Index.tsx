@@ -233,6 +233,7 @@ const Index = () => {
     { label: "Who", id: "who" },
     { label: "When", id: "when" },
     { label: "Where", id: "where" },
+    { label: "FAQ", id: "faq" },
   ];
 
   return (
@@ -667,6 +668,82 @@ const Index = () => {
               Create Your Free Account <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
           </motion.div>
+        </motion.div>
+      </section>
+
+      {/* FAQ Section */}
+      <section id="faq" className="py-20 px-6 bg-muted/30">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.1 }}
+          className="max-w-4xl mx-auto"
+        >
+          <motion.div variants={fadeUp} custom={0} className="text-center mb-12">
+            <span className="text-xs font-semibold uppercase tracking-widest text-primary mb-2 block">Frequently Asked Questions</span>
+            <h2 className="text-3xl sm:text-4xl font-serif text-foreground mb-3">Common Questions About MemoGuard</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">Answers to the questions families, caregivers, and healthcare providers ask most often.</p>
+          </motion.div>
+
+          <div className="space-y-4">
+            {[
+              {
+                q: "What is MemoGuard and how does it help Alzheimer's patients?",
+                a: "MemoGuard is an AI-powered care platform designed specifically for people living with Alzheimer's and other forms of dementia. It provides structured daily routines, medication reminders, cognitive exercises, GPS safety monitoring, and real-time vitals tracking — all in one place. The goal is to help patients maintain independence longer while giving caregivers and clinicians the tools to provide better, more informed care."
+              },
+              {
+                q: "Is MemoGuard free to use?",
+                a: "Yes, MemoGuard is completely free for patients. Caregivers and clinicians can create accounts at no cost and start managing care in under 2 minutes. There are no hidden fees, no credit card required, and no premium tiers that lock essential features behind a paywall."
+              },
+              {
+                q: "How does MemoGuard protect patient privacy and data?",
+                a: "MemoGuard is built with HIPAA-compliant infrastructure. All data is encrypted in transit and at rest. Patients control exactly what information is shared with caregivers and clinicians through granular privacy settings. We never sell patient data, and access is strictly controlled through role-based permissions and patient assignment relationships."
+              },
+              {
+                q: "Can MemoGuard detect if a patient is wandering?",
+                a: "Yes. MemoGuard's GPS Safety feature allows caregivers to define safe zones — such as around the patient's home, a local park, or a day care center. If the patient moves outside these boundaries, an instant alert with their real-time location is sent to designated caregivers. This is critical because 60% of Alzheimer's patients wander at least once, and timely intervention can prevent serious harm."
+              },
+              {
+                q: "What kind of cognitive exercises does MemoGuard offer?",
+                a: "MemoGuard includes pattern matching, word recall, and sequence memory games that are calibrated to each patient's cognitive level. These aren't just entertainment — clinicians can track performance trends over weeks and months, helping detect early signs of cognitive decline. The games are designed to be engaging and accessible, even for patients with moderate dementia."
+              },
+              {
+                q: "How does the medication reminder system work?",
+                a: "You or a caregiver enters the patient's medications, dosages, and scheduled times. MemoGuard sends timed alerts at the exact moment each dose is due — for example, Donepezil at 8:00 AM or Memantine after lunch. When the patient confirms they've taken their medication, it's logged automatically. Caregivers and clinicians can view adherence reports to ensure no doses are being missed."
+              },
+              {
+                q: "Can family members monitor a patient remotely?",
+                a: "Absolutely. MemoGuard is designed for families who can't always be physically present. A daughter in another city can check her mother's daily task completion, medication adherence, vitals readings, and location — all from her own device. Real-time notifications ensure she's alerted immediately if something needs attention, like a missed medication or an abnormal blood pressure reading."
+              },
+              {
+                q: "What should I do in an emergency?",
+                a: "MemoGuard includes a one-tap Emergency SOS feature accessible from every screen. Activating it immediately alerts all designated emergency contacts with the patient's current location and relevant health information. For life-threatening emergencies, always call your local emergency number (911 in the US) first, then use MemoGuard to coordinate with family and caregivers."
+              },
+              {
+                q: "Is MemoGuard suitable for all stages of Alzheimer's?",
+                a: "MemoGuard is designed to support patients across the spectrum — from mild cognitive impairment to moderate and advanced Alzheimer's. For early-stage patients, the platform emphasizes independence through self-managed routines and cognitive exercises. For later stages, it shifts focus to caregiver-managed care with enhanced monitoring, safety alerts, and clinical reporting tools."
+              },
+              {
+                q: "How do clinicians use MemoGuard?",
+                a: "Clinicians can manage multiple patients through a dedicated clinical panel. They can review vitals trends, medication adherence, cognitive game performance, and mood diary entries — all between appointments. The AI-powered clinical assistant can analyze patient data and flag concerns, helping doctors make more informed decisions during the limited time they have with each patient."
+              },
+            ].map((item, i) => (
+              <motion.details
+                key={i}
+                variants={fadeUp}
+                custom={i}
+                className="group rounded-xl border border-border bg-card overflow-hidden"
+              >
+                <summary className="flex items-center justify-between cursor-pointer px-6 py-4 text-left font-medium text-foreground hover:bg-muted/50 transition-colors list-none">
+                  <span className="pr-4">{item.q}</span>
+                  <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0 transition-transform group-open:rotate-90" />
+                </summary>
+                <div className="px-6 pb-5 pt-1 text-sm text-muted-foreground leading-relaxed">
+                  {item.a}
+                </div>
+              </motion.details>
+            ))}
+          </div>
         </motion.div>
       </section>
 
