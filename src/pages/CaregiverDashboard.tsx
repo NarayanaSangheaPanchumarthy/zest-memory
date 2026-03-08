@@ -37,7 +37,7 @@ const CaregiverDashboard = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <h1 className="text-heading text-foreground">Caregiver Dashboard</h1>
-          <p className="text-accessible text-muted-foreground">Monitoring Margaret's care</p>
+          <p className="text-accessible text-muted-foreground">Monitoring patient care</p>
         </motion.div>
 
         {/* Stats */}

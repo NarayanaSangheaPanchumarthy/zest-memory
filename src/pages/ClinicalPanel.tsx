@@ -31,11 +31,12 @@ const moodData = [
   { day: "Sun", calm: 78, anxious: 17, agitated: 5 },
 ];
 
+// DEMO DATA — replace before production
 const patients = [
-  { name: "Margaret Johnson", age: 74, stage: "Moderate", score: 72, trend: "stable", risk: "medium" },
-  { name: "Robert Williams", age: 81, stage: "Mild", score: 85, trend: "improving", risk: "low" },
-  { name: "Dorothy Chen", age: 69, stage: "Moderate-Severe", score: 58, trend: "declining", risk: "high" },
-  { name: "James Thompson", age: 77, stage: "Mild", score: 88, trend: "stable", risk: "low" },
+  { name: "Patient A", age: 74, stage: "Moderate", score: 72, trend: "stable", risk: "medium" },
+  { name: "Patient B", age: 81, stage: "Mild", score: 85, trend: "improving", risk: "low" },
+  { name: "Patient C", age: 69, stage: "Moderate-Severe", score: 58, trend: "declining", risk: "high" },
+  { name: "Patient D", age: 77, stage: "Mild", score: 88, trend: "stable", risk: "low" },
 ];
 
 const trendColors = {
