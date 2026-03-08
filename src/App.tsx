@@ -17,6 +17,7 @@ import PrivacySettings from "./pages/PrivacySettings";
 import HelpDesk from "./pages/HelpDesk";
 import PatientDocuments from "./pages/PatientDocuments";
 import SafetyMap from "./pages/SafetyMap";
+import MemoryGames from "./pages/MemoryGames";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
