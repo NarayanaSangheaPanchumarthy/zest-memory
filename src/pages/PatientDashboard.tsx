@@ -67,6 +67,9 @@ const PatientDashboard = () => {
           </p>
         </motion.div>
 
+        {/* Wellness Reminders */}
+        <WellnessReminders userId={user.id} />
+
         {/* AI Assistant Card */}
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <Card className="gradient-calm border-0 overflow-hidden">
