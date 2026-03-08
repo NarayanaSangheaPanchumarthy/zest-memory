@@ -398,7 +398,7 @@ const Index = () => {
       </section>
 
       {/* WHY — The Problem */}
-      <section className="py-20 px-6 bg-card border-y border-border">
+      <section id="why" className="py-20 px-6 bg-card border-y border-border">
         <div className="max-w-5xl mx-auto">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} className="text-center mb-14">
             <motion.p variants={fadeUp} custom={0} className="text-primary font-medium text-sm uppercase tracking-wider mb-2">Why MemoGuard Exists</motion.p>
