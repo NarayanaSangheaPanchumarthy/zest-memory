@@ -193,13 +193,14 @@ const PatientDashboard = () => {
                 </CardHeader>
                 <CardContent className="grid grid-cols-2 gap-3">
                   {[
-                    { label: "Memory Games", icon: Gamepad2, color: "bg-calm-light text-calm" },
-                    { label: "Talk to AI", icon: MessageCircle, color: "bg-sage-light text-sage" },
-                    { label: "My Family", icon: Smile, color: "bg-amber-light text-amber" },
-                    { label: "My Day", icon: Clock, color: "bg-lavender-light text-lavender" },
+                    { label: "Memory Games", icon: Gamepad2, color: "bg-calm-light text-calm", path: "/games" },
+                    { label: "Talk to AI", icon: MessageCircle, color: "bg-sage-light text-sage", path: "/chat" },
+                    { label: "My Documents", icon: Smile, color: "bg-amber-light text-amber", path: "/documents" },
+                    { label: "My Vitals", icon: Clock, color: "bg-lavender-light text-lavender", path: "/vitals" },
                   ].map((action) => (
                     <button
                       key={action.label}
+                      onClick={() => navigate(action.path)}
                       className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:opacity-80 transition-opacity cursor-pointer`}
                     >
                       <action.icon className="w-7 h-7" />
