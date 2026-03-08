@@ -38,33 +38,15 @@ const EmergencySOS = () => {
 
       if (alertError) throw alertError;
 
-      // Fetch all caregiver user IDs and notify them
-      const { data: caregivers } = await supabase
-        .from("user_roles")
-        .select("user_id")
-        .eq("role", "caregiver");
+      // Notify assigned caregivers and clinicians
+      const { data: assignments } = await supabase
+        .from("patient_assignments")
+        .select("assigned_user_id")
+        .eq("patient_id", user.id);
 
-      if (caregivers && caregivers.length > 0) {
-        const notifications = caregivers.map((c) => ({
-          user_id: c.user_id,
-          title: "🚨 Emergency SOS Alert",
-          message: `A patient has triggered an emergency SOS! ${lat ? `Location: ${lat.toFixed(5)}, ${lng.toFixed(5)}` : "Location unavailable."}`,
-          type: "emergency",
-          related_patient_id: user.id,
-        }));
-
-        await supabase.from("notifications").insert(notifications);
-      }
-
-      // Also notify clinicians
-      const { data: clinicians } = await supabase
-        .from("user_roles")
-        .select("user_id")
-        .eq("role", "clinician");
-
-      if (clinicians && clinicians.length > 0) {
-        const notifications = clinicians.map((c) => ({
-          user_id: c.user_id,
+      if (assignments && assignments.length > 0) {
+        const notifications = assignments.map((a) => ({
+          user_id: a.assigned_user_id,
           title: "🚨 Emergency SOS Alert",
           message: `A patient has triggered an emergency SOS! ${lat ? `Location: ${lat.toFixed(5)}, ${lng.toFixed(5)}` : "Location unavailable."}`,
           type: "emergency",
