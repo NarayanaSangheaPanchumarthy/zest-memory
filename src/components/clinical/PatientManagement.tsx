@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Users, Search, Eye, FileText, Trash2, UserPlus, Edit2,
   Activity, Brain, AlertTriangle, X, Save, Phone, MapPin,
-  ChevronDown, ChevronUp, Filter
+  ChevronDown, ChevronUp, Filter, List
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
