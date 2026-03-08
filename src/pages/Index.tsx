@@ -89,7 +89,7 @@ const Index = () => {
               : "Supporting patients, caregivers, and clinicians with AI-driven insights and daily care tools."}
           </motion.p>
 
-          <div className="grid sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto">
             {roles.map((r, i) => (
               <motion.button
                 key={r.title}
