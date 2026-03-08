@@ -162,11 +162,11 @@ const CaregiverDashboard = () => {
 
             {/* Main Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList>
-                <TabsTrigger value="overview">Patient Overview</TabsTrigger>
-                <TabsTrigger value="tasks">Care Tasks</TabsTrigger>
-                <TabsTrigger value="communication">Communication</TabsTrigger>
-                <TabsTrigger value="alerts">Alerts ({unresolvedAlerts.length})</TabsTrigger>
+              <TabsList className="w-full justify-start overflow-x-auto flex-nowrap">
+                <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
+                <TabsTrigger value="tasks" className="text-xs sm:text-sm">Tasks</TabsTrigger>
+                <TabsTrigger value="communication" className="text-xs sm:text-sm">Comms</TabsTrigger>
+                <TabsTrigger value="alerts" className="text-xs sm:text-sm">Alerts ({unresolvedAlerts.length})</TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="space-y-4 mt-4">
