@@ -208,6 +208,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { role } = useAuth();
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (role && roleRedirects[role]) {
