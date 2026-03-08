@@ -13,6 +13,15 @@ import AppHeader from "@/components/AppHeader";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { z } from "zod";
+
+const vitalsSchema = z.object({
+  temperature: z.number().min(30, "Temp must be ≥30°C").max(45, "Temp must be ≤45°C").nullable(),
+  blood_pressure_systolic: z.number().min(50, "Systolic BP must be ≥50").max(300, "Systolic BP must be ≤300").nullable(),
+  blood_pressure_diastolic: z.number().min(30, "Diastolic BP must be ≥30").max(200, "Diastolic BP must be ≤200").nullable(),
+  pulse_rate: z.number().min(20, "Pulse must be ≥20").max(300, "Pulse must be ≤300").nullable(),
+  oxygen_saturation: z.number().min(50, "O₂ must be ≥50%").max(100, "O₂ must be ≤100%").nullable(),
+});
 
 type Vital = {
   id: string;
