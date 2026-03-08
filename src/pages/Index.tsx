@@ -1,7 +1,8 @@
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Heart, Shield, Brain, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const roles = [
   {
@@ -10,6 +11,7 @@ const roles = [
     icon: Heart,
     path: "/patient",
     color: "bg-calm-light text-calm",
+    role: "patient" as const,
   },
   {
     title: "I'm a Caregiver",
@@ -17,6 +19,7 @@ const roles = [
     icon: Shield,
     path: "/caregiver",
     color: "bg-sage-light text-sage",
+    role: "caregiver" as const,
   },
   {
     title: "I'm a Clinician",
@@ -24,8 +27,15 @@ const roles = [
     icon: Brain,
     path: "/clinical",
     color: "bg-lavender-light text-lavender",
+    role: "clinician" as const,
   },
 ];
+
+const roleRedirects: Record<string, string> = {
+  patient: "/patient",
+  caregiver: "/caregiver",
+  clinician: "/clinical",
+};
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -38,6 +48,19 @@ const fadeUp = {
 
 const Index = () => {
   const navigate = useNavigate();
+  const { role } = useAuth();
+
+  // Auto-redirect if user already has a role
+  useEffect(() => {
+    if (role && roleRedirects[role]) {
+      navigate(roleRedirects[role], { replace: true });
+    }
+  }, [role, navigate]);
+
+  // If redirecting, show nothing
+  if (role && roleRedirects[role]) {
+    return null;
+  }
 
   return (
     <main className="min-h-screen flex flex-col">
@@ -76,23 +99,23 @@ const Index = () => {
           </motion.p>
 
           <div className="grid sm:grid-cols-3 gap-5 max-w-2xl mx-auto">
-            {roles.map((role, i) => (
+            {roles.map((r, i) => (
               <motion.button
-                key={role.title}
+                key={r.title}
                 custom={i}
                 variants={fadeUp}
                 initial="hidden"
                 animate="visible"
                 whileHover={{ y: -4, transition: { duration: 0.2 } }}
-                onClick={() => navigate(role.path)}
+                onClick={() => navigate(r.path)}
                 className="flex flex-col items-center gap-4 p-6 rounded-2xl bg-card shadow-card border border-border hover:shadow-elevated transition-shadow cursor-pointer text-center"
               >
-                <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${role.color}`}>
-                  <role.icon className="w-7 h-7" />
+                <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${r.color}`}>
+                  <r.icon className="w-7 h-7" />
                 </div>
                 <div>
-                  <h3 className="text-title font-serif text-foreground mb-1">{role.title}</h3>
-                  <p className="text-sm text-muted-foreground">{role.description}</p>
+                  <h3 className="text-title font-serif text-foreground mb-1">{r.title}</h3>
+                  <p className="text-sm text-muted-foreground">{r.description}</p>
                 </div>
                 <ArrowRight className="w-5 h-5 text-muted-foreground" />
               </motion.button>

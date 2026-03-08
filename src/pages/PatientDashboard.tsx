@@ -5,6 +5,7 @@ import {
   Mic, Clock, Pill, Sun, Moon, Coffee, Brain, Smile,
   MessageCircle, Gamepad2, Calendar
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -30,7 +31,8 @@ const fadeUp = {
 };
 
 const PatientDashboard = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const navigate = useNavigate();
   const [cogData, setCogData] = useState<{ date: string; accuracy: number }[]>([]);
   const [latestScore, setLatestScore] = useState<number | null>(null);
   const [trend, setTrend] = useState(0);
@@ -63,9 +65,9 @@ const PatientDashboard = () => {
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8">
         {/* Greeting */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-1">
-          <h1 className="text-heading text-foreground">Good morning, Margaret</h1>
+          <h1 className="text-heading text-foreground">Good morning, {profile?.full_name || "there"}</h1>
           <p className="text-accessible text-muted-foreground">
-            Today is Monday, March 1, 2026. Here's your day.
+            Today is {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}. Here's your day.
           </p>
         </motion.div>
 
@@ -85,7 +87,7 @@ const PatientDashboard = () => {
                 <p className="text-primary-foreground/80 text-body-lg mb-4">
                   Tap to talk. I can help with reminders, memories, and more.
                 </p>
-                <Button variant="outline" size="lg" className="bg-primary-foreground/20 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/30 hover:text-primary-foreground">
+                <Button variant="outline" size="lg" className="bg-primary-foreground/20 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/30 hover:text-primary-foreground" onClick={() => navigate("/chat")}>
                   <Mic className="w-5 h-5 mr-2" />
                   Start Talking
                 </Button>
@@ -191,13 +193,14 @@ const PatientDashboard = () => {
                 </CardHeader>
                 <CardContent className="grid grid-cols-2 gap-3">
                   {[
-                    { label: "Memory Games", icon: Gamepad2, color: "bg-calm-light text-calm" },
-                    { label: "Talk to AI", icon: MessageCircle, color: "bg-sage-light text-sage" },
-                    { label: "My Family", icon: Smile, color: "bg-amber-light text-amber" },
-                    { label: "My Day", icon: Clock, color: "bg-lavender-light text-lavender" },
+                    { label: "Memory Games", icon: Gamepad2, color: "bg-calm-light text-calm", path: "/games" },
+                    { label: "Talk to AI", icon: MessageCircle, color: "bg-sage-light text-sage", path: "/chat" },
+                    { label: "My Documents", icon: Smile, color: "bg-amber-light text-amber", path: "/documents" },
+                    { label: "My Vitals", icon: Clock, color: "bg-lavender-light text-lavender", path: "/vitals" },
                   ].map((action) => (
                     <button
                       key={action.label}
+                      onClick={() => navigate(action.path)}
                       className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:opacity-80 transition-opacity cursor-pointer`}
                     >
                       <action.icon className="w-7 h-7" />
