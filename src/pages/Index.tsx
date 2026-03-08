@@ -236,7 +236,7 @@ const Index = () => {
   ];
 
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background scroll-smooth" style={{ scrollPaddingTop: "3.5rem" }}>
       {/* STICKY NAV */}
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
