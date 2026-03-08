@@ -252,6 +252,9 @@ const PatientManagement = ({
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-4">
             <TabsTrigger value="registry">Patient Registry ({filteredPatients.length})</TabsTrigger>
+            <TabsTrigger value="list">
+              <List className="w-4 h-4 mr-1" /> Patient List
+            </TabsTrigger>
             <TabsTrigger value="assignments">Assignments ({assignments.length})</TabsTrigger>
           </TabsList>
 
