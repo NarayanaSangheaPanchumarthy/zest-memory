@@ -140,19 +140,45 @@ const PatientDashboard = () => {
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-title">
                     <Brain className="w-5 h-5 text-lavender" />
-                    Cognitive Score
+                    Cognitive Trends
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex items-end gap-2">
-                    <span className="text-4xl font-serif text-foreground">72</span>
-                    <span className="text-muted-foreground mb-1">/100</span>
-                    <span className="text-sm text-sage font-medium mb-1 ml-auto">+3 this week</span>
-                  </div>
-                  <Progress value={72} className="h-3" />
-                  <p className="text-sm text-muted-foreground">
-                    Great progress! Memory exercises are helping.
-                  </p>
+                  {cogData.length > 0 ? (
+                    <>
+                      <div className="flex items-end gap-2">
+                        <span className="text-4xl font-serif text-foreground">{latestScore}</span>
+                        <span className="text-muted-foreground mb-1">% accuracy</span>
+                        <span className={`text-sm font-medium mb-1 ml-auto ${trend >= 0 ? "text-sage" : "text-destructive"}`}>
+                          {trend >= 0 ? "+" : ""}{trend}% latest
+                        </span>
+                      </div>
+                      <Progress value={latestScore ?? 0} className="h-3" />
+                      <div className="h-36">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={cogData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                            <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                            <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                            <Tooltip
+                              contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }}
+                            />
+                            <Line type="monotone" dataKey="accuracy" stroke="hsl(var(--lavender))" strokeWidth={2} dot={{ r: 3 }} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                      <p className="text-sm text-muted-foreground">Based on your memory game results</p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-end gap-2">
+                        <span className="text-4xl font-serif text-foreground">—</span>
+                        <span className="text-muted-foreground mb-1">No data yet</span>
+                      </div>
+                      <Progress value={0} className="h-3" />
+                      <p className="text-sm text-muted-foreground">Play memory games to start tracking your cognitive trends!</p>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
