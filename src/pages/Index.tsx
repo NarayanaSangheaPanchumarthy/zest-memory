@@ -5,7 +5,7 @@ import {
   Gamepad2, Activity, FileText, MessageCircle, Users,
   CheckCircle2, CalendarDays, Droplets, Pill, AlertTriangle,
   Phone, Globe, Home, Stethoscope, Eye, Sun, Moon, Sunrise, Sunset,
-  TrendingUp, Lock, Zap, BarChart3, BellRing, HandHeart
+  TrendingUp, Lock, Zap, BarChart3, BellRing, HandHeart, Menu, X
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -208,6 +208,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { role } = useAuth();
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (role && roleRedirects[role]) {
@@ -267,10 +268,43 @@ const Index = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>Sign In</Button>
-            <Button size="sm" onClick={() => navigate("/auth")}>Sign Up Free</Button>
+            <Button variant="ghost" size="sm" onClick={() => navigate("/auth")} className="hidden sm:inline-flex">Sign In</Button>
+            <Button size="sm" onClick={() => navigate("/auth")} className="hidden sm:inline-flex">Sign Up Free</Button>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden bg-background/95 backdrop-blur-md border-t border-border"
+          >
+            <div className="max-w-6xl mx-auto px-6 py-4 flex flex-col gap-1">
+              {navLinks.map((link) => (
+                <button
+                  key={link.id}
+                  onClick={() => { scrollTo(link.id); setMobileMenuOpen(false); }}
+                  className="px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors text-left cursor-pointer"
+                >
+                  {link.label}
+                </button>
+              ))}
+              <div className="flex gap-2 pt-3 border-t border-border mt-2">
+                <Button variant="ghost" size="sm" className="flex-1" onClick={() => navigate("/auth")}>Sign In</Button>
+                <Button size="sm" className="flex-1" onClick={() => navigate("/auth")}>Sign Up Free</Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
       </nav>
 
       {/* HERO */}
