@@ -347,6 +347,7 @@ const PatientManagement = ({
               </div>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
         {/* Search & Filter Bar */}
