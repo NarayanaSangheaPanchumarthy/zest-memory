@@ -88,6 +88,10 @@ const DailyTaskChecklist = ({ userId }: { userId: string }) => {
                 <Plus className="w-4 h-4" /> Add
               </Button>
             </DialogTrigger>
+            {/* ... keep existing dialog content */}
+          </Dialog>
+          <DailyRoutineTemplates userId={userId} onTasksAdded={loadTasks} />
+            </DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>Add Daily Task</DialogTitle></DialogHeader>
               <div className="space-y-4 pt-2">
