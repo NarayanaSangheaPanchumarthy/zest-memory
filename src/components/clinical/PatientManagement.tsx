@@ -565,6 +565,7 @@ const PatientManagement = ({
           </TabsContent>
 
 
+          <TabsContent value="assignments">
             {assignments.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <UserPlus className="w-12 h-12 mx-auto mb-4 opacity-30" />
