@@ -5,7 +5,7 @@ import {
   Gamepad2, Activity, FileText, MessageCircle, Users,
   CheckCircle2, CalendarDays, Droplets, Pill, AlertTriangle,
   Phone, Globe, Home, Stethoscope, Eye, Sun, Moon, Sunrise, Sunset,
-  TrendingUp, Lock, Zap, BarChart3, BellRing, HandHeart
+  TrendingUp, Lock, Zap, BarChart3, BellRing, HandHeart, Menu, X
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
