@@ -13,6 +13,7 @@ const navItems = [
   { label: "Vitals", path: "/vitals" },
   { label: "Documents", path: "/documents" },
   { label: "Safety", path: "/safety" },
+  { label: "Games", path: "/games" },
 ];
 
 const AppHeader = () => {
