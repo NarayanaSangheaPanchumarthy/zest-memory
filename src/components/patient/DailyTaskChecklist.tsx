@@ -118,6 +118,7 @@ const DailyTaskChecklist = ({ userId }: { userId: string }) => {
               </div>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
         {tasks.length > 0 && (
           <div className="mt-2">
