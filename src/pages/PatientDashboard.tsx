@@ -14,6 +14,7 @@ import MedicationReminders from "@/components/patient/MedicationReminders";
 import MoodDiary from "@/components/patient/MoodDiary";
 import AppointmentCalendar from "@/components/patient/AppointmentCalendar";
 import EmergencySOS from "@/components/EmergencySOS";
+import WellnessReminders from "@/components/patient/WellnessReminders";
 
 const PatientDashboard = () => {
   const { user, profile } = useAuth();
