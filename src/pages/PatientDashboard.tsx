@@ -30,6 +30,33 @@ const fadeUp = {
 };
 
 const PatientDashboard = () => {
+  const { user } = useAuth();
+  const [cogData, setCogData] = useState<{ date: string; accuracy: number }[]>([]);
+  const [latestScore, setLatestScore] = useState<number | null>(null);
+  const [trend, setTrend] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("game_sessions")
+      .select("accuracy, created_at")
+      .eq("patient_id", user.id)
+      .order("created_at", { ascending: true })
+      .limit(20)
+      .then(({ data }) => {
+        if (!data || data.length === 0) return;
+        const mapped = data.map((d) => ({
+          date: new Date(d.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+          accuracy: Number(d.accuracy),
+        }));
+        setCogData(mapped);
+        setLatestScore(mapped[mapped.length - 1].accuracy);
+        if (mapped.length >= 2) {
+          setTrend(mapped[mapped.length - 1].accuracy - mapped[mapped.length - 2].accuracy);
+        }
+      });
+  }, [user]);
+
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
