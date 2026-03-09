@@ -220,6 +220,7 @@ const Auth = () => {
                 >
                   {view === "login" ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
                 </button>
+              )}
             </div>
           </CardContent>
         </Card>
