@@ -77,11 +77,17 @@ const Auth = () => {
   return (
     <main className="min-h-screen flex items-center justify-center px-4 py-12 bg-background">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-10 h-10 rounded-lg gradient-calm flex items-center justify-center">
-            <Brain className="w-6 h-6 text-primary-foreground" />
+        <div className="flex items-center justify-between mb-8">
+          <button onClick={() => navigate("/")} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+            <ArrowLeft className="w-4 h-4" /> Back
+          </button>
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-lg gradient-calm flex items-center justify-center">
+              <Brain className="w-6 h-6 text-primary-foreground" />
+            </div>
+            <span className="font-serif text-2xl text-foreground">MemoGuard</span>
           </div>
-          <span className="font-serif text-2xl text-foreground">MemoGuard</span>
+          <div className="w-14" />
         </div>
 
         <Card className="shadow-elevated">
