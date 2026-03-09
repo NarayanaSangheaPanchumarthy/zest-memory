@@ -220,21 +220,6 @@ const Auth = () => {
                 >
                   {view === "login" ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
                 </button>
-              )}
-                <button
-                  onClick={() => setView("login")}
-                  className="text-sm text-primary hover:underline cursor-pointer inline-flex items-center gap-1"
-                >
-                  <ArrowLeft className="w-3 h-3" /> Back to sign in
-                </button>
-              ) : (
-                <button
-                  onClick={() => setView(view === "login" ? "register" : "login")}
-                  className="text-sm text-primary hover:underline cursor-pointer"
-                >
-                  {view === "login" ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
-                </button>
-              )}
             </div>
           </CardContent>
         </Card>
