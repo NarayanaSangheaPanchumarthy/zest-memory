@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Brain, Eye, EyeOff, UserPlus, LogIn, Heart, Shield, ArrowLeft, Mail } from "lucide-react";
+import { Brain, Eye, EyeOff, UserPlus, LogIn, ArrowLeft, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -18,7 +17,6 @@ const loginSchema = z.object({
 
 const registerSchema = loginSchema.extend({
   fullName: z.string().trim().min(1, "Full name is required").max(100),
-  role: z.enum(["patient", "caregiver", "clinician"], { required_error: "Please select a role" }),
 });
 
 type AuthView = "login" | "register" | "forgot";
@@ -28,7 +26,6 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
-  const [role, setRole] = useState<string>("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -44,19 +41,18 @@ const Auth = () => {
   };
 
   const handleRegister = async () => {
-    const result = registerSchema.safeParse({ email, password, fullName, role });
+    const result = registerSchema.safeParse({ email, password, fullName });
     if (!result.success) { toast.error(result.error.errors[0].message); return; }
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { full_name: fullName }, emailRedirectTo: window.location.origin },
     });
-    if (error) { setLoading(false); toast.error(error.message); return; }
-    if (data.user) {
-      await supabase.from("user_roles").insert({ user_id: data.user.id, role: role as any });
-    }
+    // Note: 'patient' role is auto-assigned via the handle_new_user_role DB trigger.
+    // Caregiver/clinician accounts must be created by an existing clinician.
     setLoading(false);
+    if (error) { toast.error(error.message); return; }
     toast.success("Account created! Please check your email to verify your account.");
   };
 
@@ -101,31 +97,13 @@ const Auth = () => {
           </CardHeader>
           <CardContent className="space-y-4 pt-4">
             {view === "register" && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name</Label>
-                  <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Enter your full name" />
-                </div>
-                <div className="space-y-2">
-                  <Label>I am a...</Label>
-                  <Select value={role} onValueChange={setRole}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select your role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="patient">
-                        <span className="flex items-center gap-2"><Heart className="w-4 h-4" /> Patient</span>
-                      </SelectItem>
-                      <SelectItem value="caregiver">
-                        <span className="flex items-center gap-2"><Shield className="w-4 h-4" /> Caregiver</span>
-                      </SelectItem>
-                      <SelectItem value="clinician">
-                        <span className="flex items-center gap-2"><Brain className="w-4 h-4" /> Clinician</span>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </>
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Full Name</Label>
+                <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Enter your full name" />
+                <p className="text-xs text-muted-foreground">
+                  New accounts are created as patients. Caregiver and clinician accounts must be set up by an authorized clinician.
+                </p>
+              </div>
             )}
 
             <div className="space-y-2">
