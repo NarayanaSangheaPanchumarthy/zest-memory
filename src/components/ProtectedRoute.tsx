@@ -8,6 +8,21 @@ type AppRole = Database["public"]["Enums"]["app_role"];
 
 const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode; allowedRoles?: AppRole[] }) => {
   const { user, role, loading } = useAuth();
+  const location = useLocation();
+  const denied = !!(allowedRoles && role && !allowedRoles.includes(role));
+
+  useEffect(() => {
+    if (denied && user) {
+      supabase.rpc("log_security_event", {
+        _event_type: "access_denied",
+        _table_name: null,
+        _record_id: location.pathname,
+        _target_user_id: user.id,
+        _details: { role, allowedRoles, path: location.pathname },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any).then(() => {});
+    }
+  }, [denied, user, role, allowedRoles, location.pathname]);
 
   if (loading) {
     return (
@@ -27,7 +42,7 @@ const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode;
     );
   }
 
-  if (allowedRoles && role && !allowedRoles.includes(role)) {
+  if (denied) {
     return <Navigate to="/" replace />;
   }
 
