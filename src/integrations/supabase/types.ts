@@ -53,6 +53,42 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_logs: {
+        Row: {
+          action: string | null
+          actor_id: string | null
+          created_at: string
+          details: Json | null
+          event_type: string
+          id: string
+          record_id: string | null
+          table_name: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          action?: string | null
+          actor_id?: string | null
+          created_at?: string
+          details?: Json | null
+          event_type: string
+          id?: string
+          record_id?: string | null
+          table_name?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string | null
+          actor_id?: string | null
+          created_at?: string
+          details?: Json | null
+          event_type?: string
+          id?: string
+          record_id?: string | null
+          table_name?: string | null
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
       care_tasks: {
         Row: {
           assigned_to: string
@@ -647,6 +683,16 @@ export type Database = {
       is_assigned_to: {
         Args: { _patient_id: string; _user_id: string }
         Returns: boolean
+      }
+      log_security_event: {
+        Args: {
+          _details?: Json
+          _event_type: string
+          _record_id: string
+          _table_name: string
+          _target_user_id: string
+        }
+        Returns: undefined
       }
     }
     Enums: {
