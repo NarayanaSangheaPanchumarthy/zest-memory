@@ -19,6 +19,7 @@ import PatientDocuments from "./pages/PatientDocuments";
 import SafetyMap from "./pages/SafetyMap";
 import MemoryGames from "./pages/MemoryGames";
 import ResetPassword from "./pages/ResetPassword";
+import AuditLogs from "./pages/AuditLogs";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/documents" element={<ProtectedRoute><PatientDocuments /></ProtectedRoute>} />
             <Route path="/safety" element={<ProtectedRoute><SafetyMap /></ProtectedRoute>} />
             <Route path="/games" element={<ProtectedRoute><MemoryGames /></ProtectedRoute>} />
+            <Route path="/audit-logs" element={<ProtectedRoute allowedRoles={['clinician']}><AuditLogs /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
