@@ -20,6 +20,7 @@ import SafetyMap from "./pages/SafetyMap";
 import MemoryGames from "./pages/MemoryGames";
 import ResetPassword from "./pages/ResetPassword";
 import AuditLogs from "./pages/AuditLogs";
+import AdminSecurity from "./pages/AdminSecurity";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/safety" element={<ProtectedRoute><SafetyMap /></ProtectedRoute>} />
             <Route path="/games" element={<ProtectedRoute><MemoryGames /></ProtectedRoute>} />
             <Route path="/audit-logs" element={<ProtectedRoute allowedRoles={['clinician']}><AuditLogs /></ProtectedRoute>} />
+            <Route path="/admin/security" element={<ProtectedRoute allowedRoles={['clinician']}><AdminSecurity /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

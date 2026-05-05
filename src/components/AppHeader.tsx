@@ -27,6 +27,7 @@ const roleNavItems: Record<string, { label: string; path: string }[]> = {
     { label: "Safety", path: "/safety" },
     { label: "Games", path: "/games" },
     { label: "Audit Logs", path: "/audit-logs" },
+    { label: "Security", path: "/admin/security" },
   ],
 };
 
