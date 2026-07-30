@@ -31,7 +31,53 @@ serve(async (req) => {
       });
     }
 
-    const { type, patientId } = await req.json();
+    const admin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+
+    // Server-side authorization: caller must hold the clinician role
+    const { data: roleData } = await admin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", authData.user.id)
+      .eq("role", "clinician")
+      .maybeSingle();
+
+    if (!roleData) {
+      return new Response(JSON.stringify({ error: "Clinician role required" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const body = await req.json().catch(() => null);
+    const type = body?.type;
+    const patientId = body?.patientId;
+
+    const ALLOWED_TYPES = ["risk_assessment", "treatment_suggestions", "report", "cognitive_prediction"];
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+    if (typeof type !== "string" || !ALLOWED_TYPES.includes(type) ||
+        typeof patientId !== "string" || !UUID_RE.test(patientId)) {
+      return new Response(JSON.stringify({ error: "Invalid request" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Caller must be assigned to this patient
+    const { data: assignment } = await admin
+      .from("patient_assignments")
+      .select("id")
+      .eq("assigned_user_id", authData.user.id)
+      .eq("patient_id", patientId)
+      .maybeSingle();
+
+    if (!assignment) {
+      return new Response(JSON.stringify({ error: "Patient not assigned to you" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
