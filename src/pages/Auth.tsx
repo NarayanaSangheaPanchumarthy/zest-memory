@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -21,6 +21,13 @@ const registerSchema = loginSchema.extend({
 
 type AuthView = "login" | "register" | "forgot";
 
+/** Only allow same-origin relative paths as post-auth redirect targets. */
+const safeNext = (value: string | null): string | null => {
+  if (!value) return null;
+  if (!value.startsWith("/") || value.startsWith("//")) return null;
+  return value;
+};
+
 const Auth = () => {
   const [view, setView] = useState<AuthView>("login");
   const [email, setEmail] = useState("");
@@ -29,6 +36,9 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const next = safeNext(searchParams.get("next"));
+  const returnUrl = next ? `${window.location.origin}${next}` : window.location.origin;
 
   const handleLogin = async () => {
     const result = loginSchema.safeParse({ email, password });
@@ -37,7 +47,7 @@ const Auth = () => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) { toast.error(error.message); }
-    else { toast.success("Welcome back!"); navigate("/"); }
+    else { toast.success("Welcome back!"); navigate(next ?? "/"); }
   };
 
   const handleRegister = async () => {
@@ -47,7 +57,7 @@ const Auth = () => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName }, emailRedirectTo: window.location.origin },
+      options: { data: { full_name: fullName }, emailRedirectTo: returnUrl },
     });
     // Note: 'patient' role is auto-assigned via the handle_new_user_role DB trigger.
     // Caregiver/clinician accounts must be created by an existing clinician.
@@ -55,6 +65,7 @@ const Auth = () => {
     if (error) { toast.error(error.message); return; }
     toast.success("Account created! Please check your email to verify your account.");
   };
+
 
   const handleForgotPassword = async () => {
     if (!email.trim() || !z.string().email().safeParse(email).success) {
