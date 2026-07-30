@@ -21,7 +21,9 @@ import MemoryGames from "./pages/MemoryGames";
 import ResetPassword from "./pages/ResetPassword";
 import AuditLogs from "./pages/AuditLogs";
 import AdminSecurity from "./pages/AdminSecurity";
+import OAuthConsent from "./pages/OAuthConsent";
 import NotFound from "./pages/NotFound";
+
 
 const queryClient = new QueryClient();
 
@@ -35,6 +37,8 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
+
             <Route path="/" element={<Index />} />
             <Route path="/patient" element={<ProtectedRoute allowedRoles={['patient']}><PatientDashboard /></ProtectedRoute>} />
             <Route path="/caregiver" element={<ProtectedRoute allowedRoles={['caregiver', 'clinician']}><CaregiverDashboard /></ProtectedRoute>} />
