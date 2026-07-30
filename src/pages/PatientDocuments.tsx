@@ -46,18 +46,32 @@ const PatientDocuments = () => {
 
   const upload = async () => {
     if (!user || !title.trim()) { toast.error("Title is required"); return; }
+
+    if (file) {
+      const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
+      if (!ALLOWED_TYPES.includes(file.type) || !ALLOWED_EXTENSIONS.includes(ext)) {
+        toast.error("File type not allowed. Use PDF, JPG, PNG, GIF, DOC or DOCX.");
+        return;
+      }
+      if (file.size > MAX_FILE_BYTES) { toast.error("File must be under 10 MB"); return; }
+    }
+
     setLoading(true);
     let fileUrl: string | null = null;
     let fileType: string | null = null;
 
     if (file) {
-      const filePath = `${user.id}/${Date.now()}_${file.name}`;
-      const { error: uploadErr } = await supabase.storage.from("patient-documents").upload(filePath, file);
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-100);
+      const filePath = `${user.id}/${Date.now()}_${safeName}`;
+      const { error: uploadErr } = await supabase.storage
+        .from("patient-documents")
+        .upload(filePath, file, { contentType: file.type, upsert: false });
       if (uploadErr) { toast.error("File upload failed"); setLoading(false); return; }
       // Store the path, not a public URL — we'll generate signed URLs on-the-fly
       fileUrl = filePath;
       fileType = file.type;
     }
+
 
     const { error } = await supabase.from("patient_documents").insert({
       patient_id: user.id, uploaded_by: user.id, title: title.trim(),
