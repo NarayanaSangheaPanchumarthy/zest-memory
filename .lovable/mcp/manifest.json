@@ -1,0 +1,198 @@
+{
+  "version": 1,
+  "sdk_version": "0.25.1",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://sdwbtlfsrlgomxwnrrzq.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "memory-compass",
+      "version": "0.1.0",
+      "title": "Memory Compass"
+    },
+    "tools": [
+      {
+        "name": "list_medications",
+        "title": "List medications",
+        "description": "List active medications for a patient (defaults to the signed-in user).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "patient_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Patient user id. Omit to use the signed-in user."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_daily_tasks",
+        "title": "List daily tasks",
+        "description": "List a patient's care tasks for a given date (defaults to today and the signed-in user).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "patient_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Patient user id. Omit to use the signed-in user."
+            },
+            "task_date": {
+              "type": "string",
+              "description": "Date in YYYY-MM-DD form. Omit for today."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "complete_daily_task",
+        "title": "Complete daily task",
+        "description": "Mark one of the patient's daily care tasks as completed.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "task_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Id of the daily task to mark completed."
+            }
+          },
+          "required": [
+            "task_id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "log_mood_entry",
+        "title": "Log mood entry",
+        "description": "Record a mood diary entry for a patient.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "mood": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Mood label, e.g. calm, anxious, happy."
+            },
+            "energy_level": {
+              "type": "integer",
+              "description": "Energy level from 1 (low) to 5 (high)."
+            },
+            "notes": {
+              "type": "string",
+              "description": "Optional free-text notes."
+            },
+            "symptoms": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Optional list of observed symptoms."
+            },
+            "patient_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Patient user id. Omit to use the signed-in user."
+            }
+          },
+          "required": [
+            "mood"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_recent_vitals",
+        "title": "List recent vitals",
+        "description": "List the most recent recorded vitals for a patient.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "patient_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Patient user id. Omit to use the signed-in user."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "How many readings to return (1-50, default 10)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_appointments",
+        "title": "List appointments",
+        "description": "List upcoming appointments for a patient.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "patient_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Patient user id. Omit to use the signed-in user."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "How many appointments to return (1-50, default 10)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
