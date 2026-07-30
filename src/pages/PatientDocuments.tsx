@@ -14,6 +14,18 @@ import { toast } from "sonner";
 
 type Doc = { id: string; title: string; description: string | null; file_path: string | null; file_type: string | null; created_at: string };
 
+const ALLOWED_TYPES = [
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+];
+const ALLOWED_EXTENSIONS = ["pdf", "jpg", "jpeg", "png", "gif", "doc", "docx"];
+const MAX_FILE_BYTES = 10 * 1024 * 1024;
+
+
 const PatientDocuments = () => {
   const { user } = useAuth();
   const [docs, setDocs] = useState<Doc[]>([]);
