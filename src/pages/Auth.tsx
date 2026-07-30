@@ -189,7 +189,7 @@ const Auth = () => {
                   onClick={async () => {
                     const { lovable } = await import("@/integrations/lovable/index");
                     const { error } = await lovable.auth.signInWithOAuth("google", {
-                      redirect_uri: window.location.origin,
+                      redirect_uri: returnUrl,
                     });
                     if (error) toast.error(error.message);
                   }}
@@ -203,7 +203,7 @@ const Auth = () => {
                   onClick={async () => {
                     const { lovable } = await import("@/integrations/lovable/index");
                     const { error } = await lovable.auth.signInWithOAuth("apple", {
-                      redirect_uri: window.location.origin,
+                      redirect_uri: returnUrl,
                     });
                     if (error) toast.error(error.message);
                   }}
